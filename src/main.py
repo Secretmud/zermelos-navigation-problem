@@ -15,9 +15,12 @@ alpha_values = [1, 0.1, 0.05, 0.01, 0.005, 0.001]
 beta = 0.1
 
 psis = []
-
+psi = np.zeros(3**N, dtype=complex)
+psi[-1] = 1
 for a_0 in alpha_values:
     psis.append(np.abs(schrodinger(a_0))**2)
+    print("Done with alpha = ", a_0)
+    
 
 
 # Plot probabilities
