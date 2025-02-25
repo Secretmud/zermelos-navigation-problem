@@ -8,11 +8,9 @@ from lib import N
 from lib.schrodinger import schrodinger
 
 # System parameters
-dt = 0.01
-T = 3.0  
+  
 hbar = 1  
 alpha_values = [1, 0.1, 0.05, 0.01, 0.005, 0.001]
-beta = 0.1
 
 psis = []
 psi = np.zeros(3**N, dtype=complex)
