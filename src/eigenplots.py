@@ -1,15 +1,23 @@
+"""
+Eigenplots.py
+
+This file lets you run the eigenplots for crossings, 
+avoided crossings and also the basis states.
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 
 from lib.hamiltonian import H_B, H_P, H_D
 from lib import N, L
+plt.figure(figsize=(8,6))
+plt.spy(H_D())
+plt.show()
 
 alpha = np.linspace(0, 5, 500)
 beta = 0.1
 
 eigvals = []
 eigvecs = []
-
 for a in alpha:
     H = H_B() + a*H_P()
     vals, vecs = np.linalg.eig(H)

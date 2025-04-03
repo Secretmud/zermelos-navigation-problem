@@ -1,12 +1,11 @@
 import numpy as np
-from lib import L, N, smax, dx, v
-# S to be used for the time
-def S(x): return smax*np.exp(-np.power(x-L/2, 4)/5000)
+from lib import N, smax
+
+def gaussian(n, N, smax, sigma=None):
+    if sigma is None:
+        sigma = N / 4  # Default spread
+    return smax * np.exp(-((n - N/2)**2) / (2 * sigma**2)) + smax * 1.8  # Slight boost to first and last values
 
 
-def timef(x):
-    return dx*(S(x+dx/2)/(v**2-S(x+dx/2)**2))
-
-
-# time = np.fromfunction(timef, (3**N,), dtype='float32')
-time = [1, 2, 3, 4, 3, 2, 1, 1]
+#time = gaussian(np.linspace(0, N, N), N, smax)
+time = [1, 3, 3, 2, 1, 1]

@@ -25,9 +25,7 @@ def H_P():
     for k in range(N):
         penalty_matrix += sigma(N, k)
 
-    penalty_matrix = np.matmul(penalty_matrix, penalty_matrix)
-
-    return penalty_matrix
+    return np.matmul(penalty_matrix, penalty_matrix)
 
 
 def H_D():
@@ -46,3 +44,9 @@ def H_P_test():
     penalty_matrix = np.square(penalty_matrix)
 
     return penalty_matrix
+
+def Hamiltonian(alpha, beta=0):
+    #if beta == 0:
+    #   print("H = H_B + alpha*H_P")
+    return H_B() + alpha * H_P() 
+    #return H_B() + alpha * H_P() + beta * H_D()
