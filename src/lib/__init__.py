@@ -6,7 +6,7 @@ Y = 1/np.sqrt(2)*np.array([[0,-1j,0],[1j,0,-1j],[0,1j,0]])
 
 
 L = 3
-N = 3
+N = 4
 smax = 0.9
 dx = L/N
 v = 1

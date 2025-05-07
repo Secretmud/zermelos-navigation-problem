@@ -1,24 +1,25 @@
 import numpy as np
 import scipy
+from lib import X
 from lib.hamiltonian import H_B, H_P, H_D
-from lib import N, beta
+from joblib import Memory
 
 # System parameters
 T = 3.0
 
-def choose_time_step(alpha_start, dt_min=1e-4, dt_max=0.1, alpha_stop=T):
-    """Choose an appropriate time step based on the starting value of alpha."""
-    dt = dt_min + (dt_max - dt_min) * (1 - alpha_start / alpha_stop)
-    return max(dt, dt_min)  # Ensure dt is never below the minimum threshold
+# Set up joblib memory for caching
+memory = Memory(location=".joblib_cache", verbose=0)
 
-
-def schrodinger(a_0):
-    dt = choose_time_step(a_0)
-    H_p = H_P()
+@memory.cache
+def schrodinger(a_0, N, beta, time):
+    """Solve the Schrodinger equation for given parameters."""
+    dt = (T-a_0)/10
+    print(dt)
+    H_p = H_P(N)
     psi = np.zeros(3**N, dtype=complex)
     psi[-1] = 1
     psi /= np.linalg.norm(psi)
-    H_0 = H_B() + beta * H_D()
+    H_0 = H_B(N, time) + beta * H_D(N, X)
     B = -1j * H_0 * dt
     exp_B = scipy.linalg.expm(B)
     del H_0, B

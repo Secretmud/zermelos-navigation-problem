@@ -9,9 +9,7 @@ import matplotlib.pyplot as plt
 
 from lib.hamiltonian import H_B, H_P, H_D
 from lib import N, L
-plt.figure(figsize=(8,6))
-plt.spy(H_D())
-plt.show()
+time = [1, 3, 2, 1, 1, 1]
 
 alpha = np.linspace(0, 5, 500)
 beta = 0.1
@@ -19,7 +17,7 @@ beta = 0.1
 eigvals = []
 eigvecs = []
 for a in alpha:
-    H = H_B() + a*H_P()
+    H = H_B(N, time) + a*H_P(N)
     vals, vecs = np.linalg.eig(H)
     eigvals.append(vals)
     eigvecs.append(vecs)
@@ -40,6 +38,7 @@ plt.show()
 
 del eigvals, eigvecs
 
+"""
 eigvals = []
 eigvecs = []
 
@@ -95,3 +94,4 @@ for i, ax in enumerate(axes.flat):
 
 plt.tight_layout()
 plt.show()
+"""

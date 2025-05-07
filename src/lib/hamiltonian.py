@@ -1,10 +1,13 @@
 import numpy as np
 from lib.sigma import sigma, sigma_test
-from lib.time import time
-from lib import X, N
+from joblib import Memory
+
+# Set up joblib memory for caching
+memory = Memory(location=".joblib_cache", verbose=0)
 
 
-def H_B():
+@memory.cache
+def H_B(N, time):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
     for k in range(N):
         costmatrix += time[k]*sigma(N, k)
@@ -12,7 +15,8 @@ def H_B():
     return costmatrix
 
 
-def H_B_test():
+@memory.cache
+def H_B_test(N, time):
     costmatrix = np.zeros(3**N, dtype='float64')
     for k in range(N):
         costmatrix += time[k]*sigma_test(N, k)
@@ -20,7 +24,8 @@ def H_B_test():
     return costmatrix
 
 
-def H_P():
+@memory.cache
+def H_P(N):
     penalty_matrix = np.zeros((3**N, 3**N), dtype='float64')
     for k in range(N):
         penalty_matrix += sigma(N, k)
@@ -28,15 +33,17 @@ def H_P():
     return np.matmul(penalty_matrix, penalty_matrix)
 
 
-def H_D():
+@memory.cache
+def H_D(N, matrix):
     d_matrix = np.zeros((3**N, 3**N), dtype='float64')
     for k in range(N):
-        d_matrix += sigma(N, k, matrix=X)
+        d_matrix += sigma(N, k, matrix=matrix)
 
     return d_matrix
 
 
-def H_P_test():
+@memory.cache
+def H_P_test(N):
     penalty_matrix = np.zeros(3**N, dtype='float64')
     for k in range(N):
         penalty_matrix += sigma_test(N, k)
@@ -45,8 +52,8 @@ def H_P_test():
 
     return penalty_matrix
 
-def Hamiltonian(alpha, beta=0):
+def Hamiltonian(alpha, beta, N, time):
     #if beta == 0:
     #   print("H = H_B + alpha*H_P")
-    return H_B() + alpha * H_P() 
+    return H_B(N, time) + alpha * H_P(N) 
     #return H_B() + alpha * H_P() + beta * H_D()
