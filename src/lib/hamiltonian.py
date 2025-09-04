@@ -1,22 +1,27 @@
 import numpy as np
 from lib.sigma import sigma, sigma_test
 from joblib import Memory
+from lib.time import time
 
 # Set up joblib memory for caching
 memory = Memory(location=".joblib_cache", verbose=0)
 
 
 @memory.cache
-def H_B(N, time):
+def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
+    times = [1, 3, 2]
     for k in range(N):
-        costmatrix += time[k]*sigma(N, k)
+        s_mat = sigma(N, k)
+        # c_time = time(k, s_mat[k][k])
+        c_time = times[k]
+        costmatrix += c_time*s_mat
 
     return costmatrix
 
 
 @memory.cache
-def H_B_test(N, time):
+def H_B_test(N):
     costmatrix = np.zeros(3**N, dtype='float64')
     for k in range(N):
         costmatrix += time[k]*sigma_test(N, k)
@@ -52,8 +57,7 @@ def H_P_test(N):
 
     return penalty_matrix
 
-def Hamiltonian(alpha, beta, N, time):
-    #if beta == 0:
-    #   print("H = H_B + alpha*H_P")
-    return H_B(N, time) + alpha * H_P(N) 
-    #return H_B() + alpha * H_P() + beta * H_D()
+
+def Hamiltonian(alpha, beta, N):
+    # if beta == 0:
+    return H_B(N) + alpha * H_P(N)

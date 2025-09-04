@@ -1,3 +1,5 @@
 numpy
 matplotlib
 pyQT6
+joblib
+scipy

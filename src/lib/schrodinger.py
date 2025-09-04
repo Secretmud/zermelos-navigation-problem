@@ -10,6 +10,7 @@ T = 3.0
 # Set up joblib memory for caching
 memory = Memory(location=".joblib_cache", verbose=0)
 
+
 @memory.cache
 def schrodinger(a_0, N, beta, time):
     """Solve the Schrodinger equation for given parameters."""

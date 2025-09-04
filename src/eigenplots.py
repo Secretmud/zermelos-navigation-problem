@@ -5,10 +5,15 @@ This file lets you run the eigenplots for crossings,
 avoided crossings and also the basis states.
 """
 import numpy as np
+import matplotlib
+matplotlib.use("qtagg")
+print(matplotlib.get_backend())
+
 import matplotlib.pyplot as plt
 
 from lib.hamiltonian import H_B, H_P, H_D
-from lib import N, L
+from lib import N, X
+
 time = [1, 3, 2, 1, 1, 1]
 
 alpha = np.linspace(0, 5, 500)
@@ -38,12 +43,12 @@ plt.show()
 
 del eigvals, eigvecs
 
-"""
+
 eigvals = []
 eigvecs = []
 
 for a in alpha:
-    H = H_B() + a*H_P() + beta*H_D()
+    H = H_B(N, time) + a*H_P(N) + beta*H_D(N, X)
     vals, vecs = np.linalg.eigh(H)
     eigvals.append(vals)
     eigvecs.append(vecs)
@@ -71,11 +76,13 @@ beta = 0.1
 
 eigvecs = []
 
+
 def normalize(vec):
     return vec / np.sum(vec) if np.sum(vec) != 0 else vec
 
+
 for a in alpha_values:
-    H = H_B() + a*H_P() + beta*H_D()
+    H = H_B(N, time) + a*H_P(N) + beta*H_D(N, X)
     _, vecs = np.linalg.eigh(H)
     eigvecs.append(normalize(np.abs(vecs[:, 0])**2))
     del H
@@ -94,4 +101,4 @@ for i, ax in enumerate(axes.flat):
 
 plt.tight_layout()
 plt.show()
-"""
+
