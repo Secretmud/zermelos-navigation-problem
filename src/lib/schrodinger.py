@@ -14,7 +14,7 @@ memory = Memory(location=".joblib_cache", verbose=0)
 @memory.cache
 def schrodinger(a_0, N, beta, time):
     """Solve the Schrodinger equation for given parameters."""
-    dt = (T-a_0)/10
+    dt = (T-a_0)/100
     print(dt)
     H_p = H_P(N)
     psi = np.zeros(3**N, dtype=complex)

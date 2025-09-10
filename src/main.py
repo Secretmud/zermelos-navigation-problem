@@ -14,10 +14,10 @@ subplot = True
 plot_groups = {
     2: "blue",
     3: "orange",
-    # 4: "green",
-    # 5: "pink",
-    # 6: "lightblue",
-    # 7: "black"
+    4: "green",
+    #5: "pink",
+    #6: "lightblue",
+    #7: "black"
 }
 
 
@@ -59,7 +59,7 @@ for N, color in plot_groups.items():
     time_c = [time[i] for i in range(N)]
 
     alpha = 3
-    H = Hamiltonian(alpha, beta, N, time_c)
+    H = Hamiltonian(alpha, beta, N)
     _, eigvecs = np.linalg.eigh(H)
     psi_0 = eigvecs[:, 0]  # Ground state
     phi_0 = psi_0 / np.linalg.norm(psi_0)  # Normalize
@@ -70,7 +70,7 @@ for N, color in plot_groups.items():
         fidelity = calculate_fidelity(a_0, N, beta, time, phi_0)
         fidelities[index] = fidelity
         print(f"{index}: Fidelity for a_0={a_0_values[index]}: {fidelity}")
-f
+
     if subplot:
         ax[plot].semilogx(a_0_values, fidelities, linestyle='-', label=f"{N=} - Fidelity(Schrodinger)", color=color)
         ax[plot].semilogx(a_0_values, P0, label=f"{N=} - Fidelity(LZ)", color=color, linestyle='--')

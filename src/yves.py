@@ -38,26 +38,41 @@ def hamiltonian_energies(N):
 
 
 @memory.cache
-def yves_2(t_0, N, Hi, Hf):
-    T = 3
-    dt = (T - t_0)/100
+def yves_TDSE(N, Hi, Hf, T=3.0, steps=1900):
+    dt = T / steps
     psi = np.zeros(3**N, dtype=complex)
-    psi[-1] = 1
+    psi[-1] = 1.0
     psi /= np.linalg.norm(psi)
 
-    tau = dt/T
-    exp_A = expm(-1j*(tau**2/(4*T))*Hf)
-    MA = expm(-1j*(tau**2/(2*T))*Hf)
-    exp_B = expm(-1j*(1-tau/(2*T))*Hi*tau)
-    MB = expm(1j*(tau**2/T)*Hi)
-    t = 0
-    while t < T:
-        psi = exp_A @ exp_B @ exp_A @ psi
-        exp_A = MA @ exp_A
-        exp_B = MB @ exp_B
+    # Precompute exponentials once
+    eA0 = expm(-1j * Hf * dt**2 / (4*T))
+    MA  = expm(-1j * Hf * dt**2 / (2*T))
+    eB0 = expm(-1j * Hi * dt / T + 1j * Hi * dt**2 / (2*T))
+    MB  = expm(1j * Hi * dt**2 / T)
+
+    eA = eA0.copy()
+    eB = eB0.copy()
+
+    gamma_vals = []
+    fidelities = []
+
+    t = 0.0
+    for _ in range(steps):
+        gamma = t / T
+        psi = eA @ eB @ eA @ psi
+        eA = MA @ eA
+        eB = MB @ eB
+
+        H = (1-gamma) * Hi + gamma * Hf
+        eigvals, eigvecs = np.linalg.eigh(H)
+
+        overlaps = np.abs(eigvecs.conj().T @ psi)**2
+        fidelities.append(overlaps)
+
+        gamma_vals.append(gamma)
         t += dt
 
-    return psi
+    return np.array(fidelities), gamma_vals
 
 """
 for i in range(2, 7):
@@ -75,21 +90,16 @@ plt.show()
 beta = 1
 alpha = 3
 N = 3
+
 Hi = beta * H_D(N, X)
 Hf = H_B(N) + alpha * H_P(N)
 
-taus = np.linspace(0.001, 3, 10)
-fidelities = []
-for t in taus:
-    H = Hi + (1-t)*Hf
-    _, eigvecs = np.linalg.eigh(H)
-    psi_0 = eigvecs[:, 0]  # Ground state
-    phi_0 = psi_0 / np.linalg.norm(psi_0)  # Normalize
-    psi = yves_2(t, N, Hi, Hf)
-    psi /= np.linalg.norm(psi)
-    fidelity = np.abs(np.vdot(phi_0, psi))**2  # Fidelity calculation
-    fidelities.append(fidelity)
+fidelities, gamma_vals = yves_TDSE(N, Hi, Hf)
 
-plt.figure()
-plt.plot(taus, fidelities, linestyle='-', label=f"{N=} - Fidelity")
+plt.figure(figsize=(8,6))
+for i in range(fidelities.shape[1]):
+    plt.plot(gamma_vals, fidelities[:, i])
+plt.xlabel("γ")
+plt.ylabel("Fidelity")
+plt.title(f"TDSE fidelities for N={N}")
 plt.show()

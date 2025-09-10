@@ -10,11 +10,11 @@ memory = Memory(location=".joblib_cache", verbose=0)
 @memory.cache
 def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
-    times = [1, 3, 2]
+    # times = [1, 3, 2]
     for k in range(N):
         s_mat = sigma(N, k)
-        # c_time = time(k, s_mat[k][k])
-        c_time = times[k]
+        c_time = time(k, s_mat[k][k])
+        # c_time = times[k]
         costmatrix += c_time*s_mat
 
     return costmatrix
