@@ -4,7 +4,7 @@ from lib import N, smax, D, L, v
 
 def S(x, offset=0.15):
     #return smax*np.exp(-((x-(D+D/4)/2)**2)/(2*(D/6)**2))+offset
-    return (smax - offset)*np.sin(np.pi/2*(np.pi*x/D))+offset
+    return (smax - offset)*np.sin(np.pi*x/D)+offset
 
 
 def time(k, direction):
