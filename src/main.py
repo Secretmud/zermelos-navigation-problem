@@ -20,9 +20,9 @@ plot_groups = {
 
 
 # Function to calculate fidelity for a single a_0 value
-def calculate_fidelity(a_0, N, beta, time, psi_0):
+def calculate_fidelity(a_0, N, beta, psi_0):
     # Function to get the evolved state for given alpha
-    psi = schrodinger(a_0, N, beta, time)
+    psi = schrodinger(a_0, N, beta)
     psi /= np.linalg.norm(psi)
     fidelity = np.abs(np.vdot(psi_0, psi))**2  # Fidelity calculation
     return fidelity
@@ -38,25 +38,18 @@ def quickLZ(N, a_0_values, beta):
 
     return P0
 
-
 if subplot:
     fig, ax = plt.subplots(len(plot_groups), 1, figsize=(8, 5), sharex=True)
 else:
     fig = plt.figure()
 
 plt.tight_layout()
-a_0_values = 10**np.linspace(-3.5, 0, 100)
+a_0_values = 10**np.linspace(-3.5, 0, 1000)
 
 for N, color in plot_groups.items():
     plot = N - 2
     print(f"{N=}")
-    # P0 = LZ(search_space, slopes, beta, a_0_values)
     P0 = quickLZ(N, a_0_values, beta)
-
-    # P_1 = (1-np.exp(-2*np.pi*np.abs(beta)**2/a_0_values*(np.abs(1/np.sqrt(2))**2/(4-1))))
-    # P_2 = P_1 * (1-np.exp(-2*np.pi*np.abs(beta)**2/a_0_values*(np.abs(1/np.sqrt(2))**2/(1))))
-
-    time_c = [time[i] for i in range(N)]
 
     alpha = 3
     H = Hamiltonian(alpha, beta, N)
@@ -67,7 +60,7 @@ for N, color in plot_groups.items():
     fidelities = [0] * len(a_0_values)
 
     for index, a_0 in enumerate(a_0_values):
-        fidelity = calculate_fidelity(a_0, N, beta, time, phi_0)
+        fidelity = calculate_fidelity(a_0, N, beta, phi_0)
         fidelities[index] = fidelity
         print(f"{index}: Fidelity for a_0={a_0_values[index]}: {fidelity}")
 

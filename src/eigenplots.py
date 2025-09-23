@@ -12,7 +12,7 @@ import joblib
 
 import matplotlib.pyplot as plt
 
-from lib.hamiltonian import H_B, H_B2,  H_P, H_D
+from lib.hamiltonian import H_B, H_P, H_D
 from lib.time import S
 from lib import X, D, N
 
@@ -36,16 +36,11 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
     eigvecs = []
     print(f"Calculating Eigenvalues for N={N}, beta={beta}, driver={driver}")
     for a in alpha:
+        print(f"Calculating for alpha={a:2f}", end="\r")
         if driver:
-            if bench_hamiltonian:
-                H = H_B2(N) + a*H_P(N) + beta*H_D(N, X)
-            else:
-                H = H_B(N) + a*H_P(N) + beta*H_D(N, X)
+            H = H_B(N) + a*H_P(N) + beta*H_D(N, X)
         else:
-            if bench_hamiltonian:
-                H = H_B2(N) + a*H_P(N)
-            else:
-                H = H_B(N) + a*H_P(N)
+            H = H_B(N) + a*H_P(N)
         vals, vecs = np.linalg.eigh(H)
         eigvals.append(vals)
         if vec_normalize:
@@ -61,16 +56,13 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
 
 beta = 0.1
 driver = True
-alpha_values = np.linspace(0, 10, 1000)
-"""
+alpha_values = np.linspace(0, 12, 2000)
 ns = np.arange(2, N)
 gap = []
 for N in ns:
-    eigvals, eigvecs, gaps = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
-    # We need to find the gap between the two lowest eigenvalues at the last alpha value
-    # Get the two lowest eigenvalues at the last alpha value, the array is unsorted
-    # The array of eigvals is transposed, so eigvals[-1] gives the eigenvalues of one of the eigenvectors
-    eig = np.sort(eigvals[-1])
+    eigvals_avoided_crossing, eigvecs, gaps = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
+    eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+    eig = np.sort(eigvals_avoided_crossing[-1])
     lowest_eigenvalues = eig[:2]
     gap.append(np.min(np.diff(lowest_eigenvalues)))  # Minimum gap at the last alpha value
 
@@ -85,8 +77,6 @@ plt.grid()
 plt.tight_layout()
 plt.show()
 
-"""
-N = 4
 eigvals_avoided_crossing, eigvecs, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
 eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
 # Plot eigenvalues
@@ -127,12 +117,12 @@ for i, (alpha_val, eigvec) in enumerate(zip(selected_alpha_values, selected_eigv
     ax.set_xticks(ax_ids)
     ax.set_xticklabels(ax_ids, rotation=90)
 sequences = all_move_sequences(N)
-print(f"All possible move sequences for N={N}:")
+print(f"Top moving sequences for N={N}:")
 for k, v in ids.items():
     print(f"For subplot with alpha {k}:")
     for data in v:
-        print(f"  Eigenvector: {data['eigvec']}")
-        print(f"  Index {data['path']}: {sequences[data['path']]}")
+        print(f"\tEigenvector: {data['eigvec']}")
+        print(f"\tIndex {data['path']}: {sequences[data['path']]}")
 
 plt.tight_layout()
 plt.show()
