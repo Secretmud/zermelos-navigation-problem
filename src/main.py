@@ -8,9 +8,7 @@ from lib.schrodinger import schrodinger
 from lib.time import time
 # System parameters
 memory = Memory(location=".joblib_cache", verbose=0)
-time = [1, 3, 2, 1, 1, 1]
 subplot = False
-# time = [1, 2, 3, 4, 3, 2,1]
 plot_groups = {
     2: "blue",
     3: "orange",
@@ -76,16 +74,14 @@ for N, color in plot_groups.items():
     if subplot:
         ax[plot].semilogx(a_0_values, fidelities, linestyle='-',
                           label=f"{N=} - Fidelity(Schrodinger)", color=color)
-        ax[plot].semilogx(a_0_values, P0, label=f"{
-                          N=} - Fidelity(LZ)", color=color, linestyle='--')
+        ax[plot].semilogx(a_0_values, P0, label=f"{N=} - Fidelity(LZ)", color=color, linestyle='--')
         ax[plot].grid(True, which="both", linestyle="--",
                       linewidth=0.5)  # Grid for better readability
         ax[plot].legend()
     else:
         plt.semilogx(a_0_values, fidelities, linestyle='-',
                      label=f"{N=} - Fidelity(Schrodinger)", color=color)
-        plt.semilogx(a_0_values, P0, label=f"{
-                     N=} - Fidelity(LZ)", color=color, linestyle='--')
+        plt.semilogx(a_0_values, P0, label=f"{N=} - Fidelity(LZ)", color=color, linestyle='--')
         plt.xlabel(r"$\alpha_0$")
         plt.ylabel("Fidelity")
         plt.title(r"Fidelity vs. $\alpha_0$ ")
