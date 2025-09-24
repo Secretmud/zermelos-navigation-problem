@@ -13,6 +13,7 @@ def time(k, direction):
     g = dy / dx
     x = dx*k
     current = S(x + dx / 2)
+    print(f"{dx=}, {dy=}, {g=}, {x=}, {current=}")
     match direction:
         case 0:  # straight
             frac = 1 / (1 - current**2)
