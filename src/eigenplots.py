@@ -12,6 +12,7 @@ import joblib
 
 import matplotlib.pyplot as plt
 
+
 from lib.hamiltonian import H_B, H_P, H_D
 from lib.time import S
 from lib import X, D, N
@@ -22,7 +23,7 @@ memory = joblib.Memory(location=".joblib_cache", verbose=0)
 
 @memory.cache
 def all_move_sequences(N):
-    moves = ("up", "straight", "down")
+    moves = (1, 0, -1)
     return list(itertools.product(moves, repeat=N))
 
 
@@ -54,9 +55,14 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
     return np.array(eigvals).T, np.array(eigvecs), gaps
 
 
-beta = 0.1
+beta = 0.2
 driver = True
-alpha_values = np.linspace(0, 12, 2000)
+alpha_values = np.linspace(0, 20, 1000)
+eigvals, eigvecs = Eigenvalues(
+    N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
+eigvals_bench, eigvecs_bench = Eigenvalues(
+    N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+
 ns = np.arange(2, N)
 gap = []
 for N in ns:
@@ -116,13 +122,26 @@ for i, (alpha_val, eigvec) in enumerate(zip(selected_alpha_values, selected_eigv
     ax.set_ylabel("Population")
     ax.set_xticks(ax_ids)
     ax.set_xticklabels(ax_ids, rotation=90)
+
+plt.tight_layout()
+plt.show()
+
 sequences = all_move_sequences(N)
-print(f"Top moving sequences for N={N}:")
+print(f"All possible move sequences for N={N}:")
+plt.figure(figsize=(10, 6))
+x = np.linspace(0, D, N+1)
 for k, v in ids.items():
     print(f"For subplot with alpha {k}:")
     for data in v:
+        path = np.cumsum(sequences[data['path']])
+        path = np.insert(path, 0, 0, axis=0)
         print(f"\tEigenvector: {data['eigvec']}")
         print(f"\tIndex {data['path']}: {sequences[data['path']]}")
+        plt.plot(x, path, label=f"α={k}, id={data['id']}")
 
-plt.tight_layout()
+plt.xlabel("Step")
+plt.ylabel("Position")
+plt.title("Significant Paths for Selected α Values")
+plt.legend()
+plt.grid()
 plt.show()
