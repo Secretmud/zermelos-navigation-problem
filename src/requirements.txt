@@ -3,3 +3,5 @@ matplotlib
 pyQT6
 joblib
 scipy
+pandas
+openpyxl

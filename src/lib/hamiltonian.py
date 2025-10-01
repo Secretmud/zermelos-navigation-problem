@@ -14,19 +14,7 @@ def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
     for k in range(N):
         s_mat = sigma(N, k)
-        c_time = time(k, s_mat[k][k])
-        costmatrix += c_time*s_mat
-
-    return costmatrix
-
-
-@memory.cache
-def H_B2(N):
-    costmatrix = np.zeros((3**N, 3**N), dtype='float64')
-    times = [1, 3, 2, 1]
-    for k in range(N):
-        s_mat = sigma(N, k)
-        c_time = times[k]
+        c_time = time(k, s_mat[k][k], N)
         costmatrix += c_time*s_mat
 
     return costmatrix
@@ -36,7 +24,7 @@ def H_B2(N):
 def H_B_test(N):
     costmatrix = np.zeros(3**N, dtype='float64')
     for k in range(N):
-        costmatrix += time[k]*sigma_test(N, k)
+        costmatrix += time(k, s_mat[k][k], N)*sigma_test(N, k)
 
     return costmatrix
 

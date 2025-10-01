@@ -55,20 +55,18 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
     return np.array(eigvals).T, np.array(eigvecs), gaps
 
 
-beta = 0.2
+beta = 0.1
 driver = True
-alpha_values = np.linspace(0, 20, 1000)
-eigvals, eigvecs = Eigenvalues(
-    N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
-eigvals_bench, eigvecs_bench = Eigenvalues(
-    N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+alpha_values = np.linspace(0, 30, 1000)
 
-ns = np.arange(2, N)
+ns = np.arange(2, N+1)
 gap = []
 for N in ns:
     eigvals_avoided_crossing, eigvecs, gaps = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
-    eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+    eigvals_avoided_crossing = eigvals_avoided_crossing.T
     eig = np.sort(eigvals_avoided_crossing[-1])
+    for i, e in enumerate(eig):
+        print(f"Eigenvalue {i}: {e}")
     lowest_eigenvalues = eig[:2]
     gap.append(np.min(np.diff(lowest_eigenvalues)))  # Minimum gap at the last alpha value
 

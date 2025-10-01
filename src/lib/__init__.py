@@ -8,7 +8,7 @@ Y = 1/np.sqrt(2)*np.array([[0, -1j, 0], [1j, 0, -1j], [0, 1j, 0]])
 
 L = 6
 D = 20
-N = 4
+N = 2
 smax = 0.9
 v = 1
 beta = 0.1

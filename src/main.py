@@ -4,14 +4,14 @@ from joblib import Memory
 
 from lib import beta, X
 from lib.hamiltonian import Hamiltonian, H_D, H_B, H_P, H_P_test, H_B_test
-from lib.schrodinger import schrodinger
+from lib.schrodinger import schrodinger, ground_state_final
 from lib.time import time
 # System parameters
 memory = Memory(location=".joblib_cache", verbose=0)
 subplot = False
 plot_groups = {
     2: "blue",
-    3: "orange",
+    # 3: "orange",
     # 4: "green",
     # 5: "pink",
     # 6: "lightblue",
@@ -25,6 +25,7 @@ def calculate_fidelity(a_0, N, beta, psi_0):
     psi = schrodinger(a_0, N, beta)
     psi /= np.linalg.norm(psi)
     fidelity = np.abs(np.vdot(psi_0, psi))**2  # Fidelity calculation
+    print(f"Fidelity for a_0={a_0}: {fidelity}")
     return fidelity
 
 
@@ -44,25 +45,24 @@ else:
     fig = plt.figure()
 
 plt.tight_layout()
-a_0_values = 10**np.linspace(-3.5, 0, 1000)
+a_0_values = 10**np.linspace(0, -3.5, 50)
 
 for N, color in plot_groups.items():
     plot = N - 2
     print(f"{N=}")
     P0 = quickLZ(N, a_0_values, beta)
 
-    alpha = 3
-    H = Hamiltonian(alpha, beta, N)
-    _, eigvecs = np.linalg.eigh(H)
-    psi_0 = eigvecs[:, 0]  # Ground state
-    phi_0 = psi_0 / np.linalg.norm(psi_0)  # Normalize
+    
+    phi_0 = ground_state_final(N, beta)
 
     fidelities = [0] * len(a_0_values)
 
     for index, a_0 in enumerate(a_0_values):
         fidelity = calculate_fidelity(a_0, N, beta, phi_0)
+        if fidelity >= 0.8:
+            print(f"High fidelity achieved for N={N} at a_0={a_0}: {fidelity}")
+            break
         fidelities[index] = fidelity
-        print(f"{index}: Fidelity for a_0={a_0_values[index]}: {fidelity}")
 
     if subplot:
         ax[plot].semilogx(a_0_values, fidelities, linestyle='-',

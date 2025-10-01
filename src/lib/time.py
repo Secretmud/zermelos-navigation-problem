@@ -1,5 +1,5 @@
 import numpy as np
-from lib import N, smax, D, L, v
+from lib import smax, D, L, v
 
 
 def S(x, offset=0.15):
@@ -7,7 +7,7 @@ def S(x, offset=0.15):
     # return (smax - offset)*np.sin(np.pi*x/D)+offset
 
 
-def time(k, direction):
+def time(k, direction, N):
     dx = D / N
     dy = L / N
     g = dy / dx
