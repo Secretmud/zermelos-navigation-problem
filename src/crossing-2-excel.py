@@ -8,9 +8,10 @@ np.set_printoptions(precision=3, suppress=True)
 
 Hd_coeff = 0.1
 
+
 def prioritize(data):
     indexed = [(e, p, i) for i, (e, p) in enumerate(data)]
-    indexed.sort(key=lambda x: x[0]) 
+    indexed.sort(key=lambda x: x[0])
     result = []
     seen_p = set()
     zero_added = False
@@ -29,7 +30,7 @@ def prioritize(data):
 
 # Excel writer
 with pd.ExcelWriter("hamiltonian_results.xlsx", engine="openpyxl") as writer:
-    for N in range(2, 9):  # choose the values of N you want
+    for N in range(2, 4):  # choose the values of N you want
         Hb = H_B(N)
         Hp = H_P(N)
         Hd = Hd_coeff * H_D(N, X)
