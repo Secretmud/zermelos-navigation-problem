@@ -14,8 +14,8 @@ import matplotlib.pyplot as plt
 
 
 from lib.hamiltonian import H_B, H_P, H_D
-from lib.time import S
-from lib import X, D, N
+from lib.time import time
+from lib import X, D, L
 
 
 memory = joblib.Memory(location=".joblib_cache", verbose=0)
@@ -32,7 +32,7 @@ def normalize(vec):
 
 
 @memory.cache
-def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamiltonian=False):
+def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False):
     eigvals = []
     eigvecs = []
     print(f"Calculating Eigenvalues for N={N}, beta={beta}, driver={driver}")
@@ -40,9 +40,10 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
         print(f"Calculating for alpha={a:2f}", end="\r")
         if driver:
             H = H_B(N) + a*H_P(N) + beta*H_D(N, X)
+            vals, vecs = np.linalg.eigh(H)
         else:
             H = H_B(N) + a*H_P(N)
-        vals, vecs = np.linalg.eigh(H)
+            vals, vecs = np.linalg.eig(H)
         eigvals.append(vals)
         if vec_normalize:
             eigvecs.append(normalize(np.abs(vecs[:, 0])**2))
@@ -55,14 +56,25 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False, bench_hamilto
     return np.array(eigvals).T, np.array(eigvecs), gaps
 
 
+<<<<<<< HEAD
 beta = 0.1
 driver = True
 alpha_values = np.linspace(0, 30, 1000)
+=======
+beta = 0.05
+driver = True
+alpha_values = np.linspace(0, 3, 500)
+N = 5
+>>>>>>> 1a15d5c (stuff)
 
 ns = np.arange(2, N+1)
 gap = []
 for N in ns:
     eigvals_avoided_crossing, eigvecs, gaps = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
+<<<<<<< HEAD
+=======
+    # eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+>>>>>>> 1a15d5c (stuff)
     eigvals_avoided_crossing = eigvals_avoided_crossing.T
     eig = np.sort(eigvals_avoided_crossing[-1])
     for i, e in enumerate(eig):
@@ -82,10 +94,11 @@ plt.tight_layout()
 plt.show()
 
 eigvals_avoided_crossing, eigvecs, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
-eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
+eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False)
 # Plot eigenvalues
 
 plt.figure(figsize=(8, 6))
+#for eig_crossing in eigvals_crossing:
 for eig_avoided_crossing, eig_crossing in zip(eigvals_avoided_crossing, eigvals_crossing):
     plt.plot(alpha_values, eig_avoided_crossing, color="black", alpha=0.5)
     plt.plot(alpha_values, eig_crossing, color="red",
@@ -128,13 +141,17 @@ sequences = all_move_sequences(N)
 print(f"All possible move sequences for N={N}:")
 plt.figure(figsize=(10, 6))
 x = np.linspace(0, D, N+1)
+dy = L/N
 for k, v in ids.items():
     print(f"For subplot with alpha {k}:")
     for data in v:
-        path = np.cumsum(sequences[data['path']])
+        t = 0
+        for i in range(len(sequences[data['path']])):
+            t += time(i, sequences[data['path']][i], N)
+        path = np.cumsum(sequences[data['path']])*dy
         path = np.insert(path, 0, 0, axis=0)
         print(f"\tEigenvector: {data['eigvec']}")
-        print(f"\tIndex {data['path']}: {sequences[data['path']]}")
+        print(f"\tIndex {data['path']}: {sequences[data['path']]}, Time: {t}")
         plt.plot(x, path, label=f"α={k}, id={data['id']}")
 
 plt.xlabel("Step")

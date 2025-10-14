@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ACO with Current and Angle Exploration</title>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<style>
+body { font-family: sans-serif; margin:0; display:flex; }
+#panel { width:250px; padding:20px; background:#f0f0f0; }
+#plot-container { flex-grow:1; }
+label { display:block; margin-top:10px; }
+input { width:100%; }
+button { margin-top:15px; width:100%; padding:5px; }
+</style>
+</head>
+<body>
+
+<div id="panel">
+<h3>ACO Parameters</h3>
+<label>N (steps): <input type="number" id="N" value="15"></label>
+<label>D (domain length): <input type="number" id="D" value="20"></label>
+<label>L (vertical range): <input type="number" id="L" value="10"></label>
+<label>Number of Ants: <input type="number" id="numAnts" value="20"></label>
+<label>Iterations: <input type="number" id="iterations" value="10"></label>
+<label>Alpha (pheromone influence): <input type="number" id="alpha" step="0.1" value="0.5"></label>
+<label>Beta (heuristic influence): <input type="number" id="beta" step="0.1" value="3.0"></label>
+<label>Rho (evaporation): <input type="number" id="rho" step="0.01" value="0.1"></label>
+<label>Explore probability: <input type="number" id="exploreProb" step="0.01" value="0.1"></label>
+<button id="runBtn">Run ACO</button>
+<div style="margin-top:20px;">
+<p>Best Time: <span id="bestTime">-</span></p>
+<p>Iteration: <span id="iteration">-</span></p>
+</div>
+</div>
+
+<div id="plot-container">
+<div id="plot" style="width:100%; height:600px;"></div>
+<div id="plot2" style="width:100%; height:300px; margin-top:20px;"></div>
+</div>
+
+<script>
+const smax = 0.9, v = 1.0, penaltyFactor = 10;
+
+// Utilities
+function linspace(start, stop, num){
+    const arr=[];
+    const step=(stop-start)/(num-1);
+    for(let i=0;i<num;i++) arr.push(start + i*step);
+    return arr;
+}
+
+// Current
+function S(x, D, offset=0.15){
+    return (smax - offset)*Math.sin(Math.PI*x/D) + offset;
+}
+
+// TimeEdge computed dynamically
+function timeEdge(yCurrent, yNext, dx, sCurrent){
+    const dy = yNext - yCurrent;
+    const g = dy/dx;
+    let denominator;
+    if(dy>0) denominator = Math.sqrt(1 + g*g) - g*sCurrent;
+    else denominator = Math.sqrt(1 + g*g) + g*sCurrent;
+    return (dx/v)*(1+g*g)/denominator;
+}
+
+// Angle factor for exploration
+function edgeAngleFactor(yCurrent, yNext, dx, sCurrent){
+    const dy = yNext - yCurrent;
+    const edgeAngle = Math.atan2(dy, dx);
+    const currentAngle = Math.atan(sCurrent);
+    const delta = edgeAngle - currentAngle;
+    return Math.exp(-2*Math.abs(delta)); // tune factor for exploration
+}
+
+function runACO(){
+    const N = parseInt(document.getElementById('N').value);
+    const D = parseFloat(document.getElementById('D').value);
+    const L = parseFloat(document.getElementById('L').value);
+    const numAnts = parseInt(document.getElementById('numAnts').value);
+    const iterations = parseInt(document.getElementById('iterations').value);
+    const alpha = parseFloat(document.getElementById('alpha').value);
+    const beta = parseFloat(document.getElementById('beta').value);
+    const rho = parseFloat(document.getElementById('rho').value);
+    const exploreProb = parseFloat(document.getElementById('exploreProb').value);
+
+    const dx = D/N;
+    const dyLevels = Math.max(10, Math.round(Math.sqrt(N*50)));
+    const dyStep = 2*L/(dyLevels-1);
+    const yValues = linspace(-L,L,dyLevels);
+    const xPositions = linspace(0,D,N+1);
+
+    // Graph
+    const graph={};
+    for(let k=0;k<N;k++){
+        for(let yi=0;yi<dyLevels;yi++){
+            const edges=[];
+            [-1,0,1].forEach(d=>{
+                const nextY = yi + d;
+                if(nextY>=0 && nextY<dyLevels){
+                    edges.push({nextX:k+1, nextY:nextY});
+                }
+            });
+            graph[`${k},${yi}`] = edges;
+        }
+    }
+
+    // Pheromone
+    const pheromone={};
+    for(const key in graph){
+        graph[key].forEach(e=>pheromone[`${key}->${e.nextX},${e.nextY}`]=1.0);
+    }
+
+    const midIndex = Math.floor(dyLevels/2);
+    const dummyPath = Array(N+1).fill(yValues[midIndex]);
+
+    function runAnt(){
+        const path=[{x:0,y:midIndex}];
+        let totalTime=0;
+        for(let k=0;k<N;k++){
+            const node=path[path.length-1];
+            const edges=graph[`${node.x},${node.y}`];
+            let probs = edges.map(e=>{
+                const ph = pheromone[`${node.x},${node.y}->${e.nextX},${e.nextY}`];
+                const yCurr = yValues[node.y];
+                const yNext = yValues[e.nextY];
+                const sCurr = S(xPositions[node.x]+dx/2,D);
+                const h = 1/timeEdge(yCurr, yNext, dx, sCurr);
+                const angleFactor = edgeAngleFactor(yCurr, yNext, dx, sCurr);
+                return Math.pow(ph,alpha) * Math.pow(h,beta) * angleFactor;
+            });
+            const sumP = probs.reduce((a,b)=>a+b,0);
+            probs = probs.map(p=>p/sumP);
+
+            let choice;
+            if(Math.random()<exploreProb) choice = Math.floor(Math.random()*edges.length);
+            else{
+                let r=Math.random(); choice=0;
+                while(r>probs[choice]){ r-=probs[choice]; choice++; }
+                if(choice>=edges.length) choice=edges.length-1;
+            }
+
+            const nextNode = edges[choice];
+            path.push(nextNode);
+            const yCurr = yValues[node.y], yNext = yValues[nextNode.y];
+            const sCurr = S(xPositions[node.x]+dx/2,D);
+            totalTime += timeEdge(yCurr, yNext, dx, sCurr);
+        }
+        totalTime += penaltyFactor * Math.abs(yValues[path[path.length-1].y]);
+        return {path,totalTime};
+    }
+
+    const currentValues = xPositions.map(x=>S(x,D));
+
+    const traces=[
+        {x:xPositions, y:dummyPath, mode:'lines', line:{color:'green',dash:'dash',width:3}, name:'Dummy Path'},
+        {x:[], y:[], mode:'lines', line:{color:'red', width:3}, name:'Best Path'},
+        ...Array(numAnts).fill(0).map(()=>({x:[], y:[], mode:'lines', line:{color:'blue',width:1}, opacity:0.3,name:''})),
+        {x:xPositions, y:currentValues, fill:'tozeroy', fillcolor:'rgba(135,206,250,0.3)', line:{color:'rgba(135,206,250,0.5)'}, name:'Current'}
+    ];
+
+    Plotly.newPlot('plot', traces, {xaxis:{range:[0,D]}, yaxis:{range:[-L-1,L+1]}, title:'ACO with Current & Angle Exploration'});
+
+    let bestPath=null, bestTime=Infinity, iteration=0;
+
+    function iterate(){
+        if(iteration>=iterations) return;
+        document.getElementById('iteration').innerText = iteration+1;
+
+        const ants=[];
+        for(let a=0;a<numAnts;a++) ants.push(runAnt());
+        ants.forEach(a=>{ if(a.totalTime<bestTime){ bestTime=a.totalTime; bestPath=a.path; }});
+        document.getElementById('bestTime').innerText = bestTime.toFixed(2);
+
+        // Evaporation
+        for(const key in pheromone) pheromone[key]*=(1-rho);
+
+        // Deposit pheromone
+        if(bestPath){
+            for(let i=0;i<bestPath.length-1;i++){
+                const edge=`${bestPath[i].x},${bestPath[i].y}->${bestPath[i+1].x},${bestPath[i+1].y}`;
+                pheromone[edge]=(pheromone[edge] || 0) + 1/bestTime;
+            }
+        }
+
+        // Pheromone map
+        const pheroMap = Array(dyLevels).fill(0).map(()=>Array(N+1).fill(0));
+        for(const key in pheromone){
+            const [from,to] = key.split('->');
+            const [x,y] = from.split(',').map(Number);
+            pheroMap[y][x] += pheromone[key];
+        }
+
+        // Animate ants
+        let step=0;
+        const interval=setInterval(()=>{
+            if(step>N){ clearInterval(interval); iteration++; setTimeout(iterate,200); return; }
+
+            // Animate best path
+            if(bestPath && bestPath.length>0){
+                const yBest = bestPath.map(p => yValues[p.y]);
+                const widths = bestPath.map((p,i)=>{
+                    if(i<bestPath.length-1){
+                        const edge=`${p.x},${p.y}->${bestPath[i+1].x},${bestPath[i+1].y}`;
+                        return 2 + 6*Math.min(1,pheromone[edge] || 0);
+                    }
+                    return 2;
+                });
+                Plotly.restyle('plot',{
+                    x:[xPositions.slice(0,step+1)],
+                    y:[yBest.slice(0,step+1)],
+                    'line.width':[widths[step] || 2]
+                },[1]);
+            }
+
+            // Animate ants
+            for(let a=0;a<numAnts;a++){
+                const path=ants[a].path;
+                if(path && path.length>0){
+                    Plotly.restyle('plot',{
+                        x:[xPositions.slice(0,step+1)],
+                        y:[path.map(p=>yValues[p.y]).slice(0,step+1)]
+                    },[2+a]);
+                }
+            }
+
+            // Update pheromone heatmap at the end of step
+            if(step===N){
+                const heatTrace = {z:pheroMap, x:xPositions, y:yValues, type:'heatmap', colorscale:'YlOrRd', showscale:true, name:'Pheromone'};
+                Plotly.newPlot('plot2', [heatTrace], {title:'Pheromone Map', xaxis:{title:'X'}, yaxis:{title:'Y'}});
+            }
+
+            step++;
+        },50);
+    }
+
+    iterate();
+}
+
+document.getElementById('runBtn').addEventListener('click', runACO);
+</script>
+</body>
+</html>
+

@@ -52,6 +52,7 @@ def yves_TDSE(N, Hi, Hf, T=3.0, steps=1900):
 
     eA = eA0.copy()
     eB = eB0.copy()
+    del eA0, eB0
 
     gamma_vals = []
     fidelities = []
@@ -74,7 +75,6 @@ def yves_TDSE(N, Hi, Hf, T=3.0, steps=1900):
 
     return np.array(fidelities), gamma_vals
 
-"""
 for i in range(2, 7):
     energies, gamma_vals = hamiltonian_energies(i)
     plt.figure(figsize=(8, 6))
@@ -86,10 +86,10 @@ for i in range(2, 7):
     plt.title(f"Energy spectrum {N=}")
     plt.pause(0.1)
 plt.show()
-"""
+
 beta = 1
 alpha = 3
-N = 3
+N = 4
 
 Hi = beta * H_D(N, X)
 Hf = H_B(N) + alpha * H_P(N)

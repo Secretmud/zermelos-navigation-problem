@@ -2,7 +2,7 @@ import numpy as np
 from lib.sigma import sigma, sigma_test
 from joblib import Memory
 from lib.time import time
-from lib import Z
+from lib import Z, float_type
 import copy
 
 # Set up joblib memory for caching
@@ -12,10 +12,16 @@ memory = Memory(location=".joblib_cache", verbose=0)
 @memory.cache
 def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
+    sigma_trav = np.copy(Z) 
     for k in range(N):
-        s_mat = sigma(N, k)
-        c_time = time(k, s_mat[k][k], N)
-        costmatrix += c_time*s_mat
+        tmp_mat = np.zeros((3, 3), dtype='float64')
+        for i in range(3):
+            t = time(k, sigma_trav[i,i], N)
+            print(t)
+            tmp_mat[i, i] = t
+
+        s_mat = sigma(N, k, matrix=tmp_mat)
+        costmatrix += s_mat
 
     return costmatrix
 
@@ -23,8 +29,14 @@ def H_B(N):
 @memory.cache
 def H_B_test(N):
     costmatrix = np.zeros(3**N, dtype='float64')
+    sigma_trav = np.array([1, 0, -1])  # Just to get the right shape
     for k in range(N):
-        costmatrix += time(k, s_mat[k][k], N)*sigma_test(N, k)
+        tmp_mat = np.zeros(3, dtype='float64')
+        for i in range(3):
+            t = time(k, sigma_trav[i], N)
+            tmp_mat[i] = t
+        s_mat = sigma(N, k, matrix=tmp_mat)
+        costmatrix += s_mat
 
     return costmatrix
 

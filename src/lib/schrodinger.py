@@ -28,6 +28,7 @@ def schrodinger(a_0, N, beta, n_steps=400):
     del H_0, B
     t = 0
     a = a_0
+    print(f"Starting Schrodinger evolution with a_0={a_0}, N={N}, beta={beta}")
     while a <= T:
         a = a_0* (t + dt/2)  # Ensure a evolves correctly
         A = -1j * a * H_p * dt/2
