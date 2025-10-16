@@ -57,7 +57,7 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False):
 beta = 0.1
 driver = True
 alpha_values = np.linspace(0, 1.5, 3000)
-N = 5
+N = 3
 
 hd = H_D(N, X)
 
