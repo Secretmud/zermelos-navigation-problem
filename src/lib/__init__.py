@@ -14,3 +14,5 @@ v = 1
 beta = 0.1
 alpha = 0.5
 hbar = 1
+
+float_type = "float32"

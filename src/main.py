@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 from joblib import Memory
 
 from lib import beta, X
-from lib.hamiltonian import Hamiltonian, H_D, H_B, H_P, H_P_test, H_B_test
-from lib.schrodinger import schrodinger, ground_state_final
+from lib.hamiltonian import H_D, H_B, H_P, H_P_test, H_B_test
+from lib.schrodinger import schrodinger
 from lib.time import time
 # System parameters
 memory = Memory(location=".joblib_cache", verbose=0)
@@ -39,42 +39,47 @@ def quickLZ(N, a_0_values, beta):
 
     return P0
 
+
 if subplot:
     fig, ax = plt.subplots(len(plot_groups), 1, figsize=(8, 5), sharex=True)
 else:
     fig = plt.figure()
 
 plt.tight_layout()
-a_0_values = 10**np.linspace(0, -3.5, 50)
+a_0_values = 10**np.linspace(-3, 0, 100)
 
 for N, color in plot_groups.items():
     plot = N - 2
     print(f"{N=}")
     P0 = quickLZ(N, a_0_values, beta)
 
-    
-    phi_0 = ground_state_final(N, beta)
+    alpha = 10
+    H = H_B(N) + alpha*H_P(N) 
+    _, eigvecs = np.linalg.eigh(H)
+    psi_0 = eigvecs[:, 0]  # Ground state
+    phi_0 = psi_0 / np.linalg.norm(psi_0)  # Normalize
 
     fidelities = [0] * len(a_0_values)
 
     for index, a_0 in enumerate(a_0_values):
         fidelity = calculate_fidelity(a_0, N, beta, phi_0)
+        fidelities[index] = fidelity
         if fidelity >= 0.8:
             print(f"High fidelity achieved for N={N} at a_0={a_0}: {fidelity}")
-            break
-        fidelities[index] = fidelity
 
     if subplot:
         ax[plot].semilogx(a_0_values, fidelities, linestyle='-',
                           label=f"{N=} - Fidelity(Schrodinger)", color=color)
-        ax[plot].semilogx(a_0_values, P0, label=f"{N=} - Fidelity(LZ)", color=color, linestyle='--')
+        ax[plot].semilogx(a_0_values, P0, label=f"{
+                          N=} - Fidelity(LZ)", color=color, linestyle='--')
         ax[plot].grid(True, which="both", linestyle="--",
                       linewidth=0.5)  # Grid for better readability
         ax[plot].legend()
     else:
         plt.semilogx(a_0_values, fidelities, linestyle='-',
                      label=f"{N=} - Fidelity(Schrodinger)", color=color)
-        plt.semilogx(a_0_values, P0, label=f"{N=} - Fidelity(LZ)", color=color, linestyle='--')
+        plt.semilogx(a_0_values, P0, label=f"{
+                     N=} - Fidelity(LZ)", color=color, linestyle='--')
         plt.xlabel(r"$\alpha_0$")
         plt.ylabel("Fidelity")
         plt.title(r"Fidelity vs. $\alpha_0$ ")
