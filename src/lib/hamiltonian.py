@@ -2,12 +2,49 @@ import numpy as np
 from joblib import Memory
 
 from lib.sigma import sigma, sigma_test
-from lib.time import time
+from lib.time import ntime, time
 from lib import Z, float_type
 
 # Set up joblib memory for caching
 memory = Memory(location=".joblib_cache", verbose=0)
 
+
+"""
+@memory.cache
+def H_B(N):
+    costmatrix = np.zeros((3**N, 3**N), dtype='float64')
+    time = [1, 3, 2, 1]
+    for k in range(N):
+        costmatrix += time[k]*sigma(N, k)
+
+    return costmatrix
+
+
+"""
+
+@memory.cache
+def H_B2(N):
+    costmatrix = np.zeros((3**N, 3**N), dtype='float64')
+    # times = [1, 3, 2]
+    for k in range(N):
+        mat = np.copy(Z)
+        for i in range(N):
+            c_time = time(k, mat[i][i], N)
+            mat[i][i] = c_time
+        s_mat = sigma(N, k, matrix=mat)
+        
+        # c_time = times[k]
+        costmatrix += s_mat
+
+    return costmatrix
+
+def N_H_B(N):
+    costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
+    for k in range(N):
+        c_mat = np.diag(ntime(k, N))
+        costmatrix += sigma(N, k, matrix=c_mat)
+
+    return costmatrix
 
 @memory.cache
 def H_B(N):
@@ -24,22 +61,6 @@ def H_B(N):
         costmatrix += s_mat
 
     return costmatrix
-
-
-@memory.cache
-def H_B_test(N):
-    costmatrix = np.zeros(3**N, dtype=float_type)
-    sigma_trav = np.array([1, 0, -1])  # Just to get the right shape
-    for k in range(N):
-        tmp_mat = np.zeros(3, dtype=float_type)
-        for i in range(3):
-            t = time(k, sigma_trav[i], N)
-            tmp_mat[i] = t
-        s_mat = sigma(N, k, matrix=tmp_mat)
-        costmatrix += s_mat
-
-    return costmatrix
-
 
 @memory.cache
 def H_P(N):

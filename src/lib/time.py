@@ -3,16 +3,30 @@ from lib import smax, D, L, v
 
 
 def S(x, offset=0.15):
-    return smax*np.exp(-(x-D/2)**4/5000)
+    return smax*np.exp(-(x-D/7)**4/5000)
     # return (smax - offset)*np.sin(np.pi*x/D)+offset
-    # x0 = 0.2*D
-    # sigma = 0.4*D
-    # return smax*np.exp(-0.5*((x-x0)/sigma)**2)
+
+
+
+
+def ntime(k, N):
+    dx = D / N
+    dy = dx / 1000
+    g = dy / dx
+    x = dx*k
+    current = S(x + dx / 2)
+    vec = np.zeros(3)
+    vec[0] = dx / v * (1 + g**2) / (np.sqrt(1 + g**2 - current**2) - g * current)
+    vec[1] = dx / v * 1 / (1 - current**2)
+    vec[2] = dx / v * (1 + g**2) / (np.sqrt(1 + g**2 - current**2) + g * current)
+
+    return vec
+
 
 
 def time(k, direction, N):
     dx = D / N
-    dy = L / N
+    dy = dx / 3000
     g = dy / dx
     x = dx*k
     current = S(x + dx / 2)

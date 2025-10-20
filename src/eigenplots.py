@@ -13,8 +13,8 @@ import joblib
 import matplotlib.pyplot as plt
 
 
-from lib.hamiltonian import H_B, H_P, H_D
-from lib.time import time
+from lib.hamiltonian import N_H_B as H_B, H_P, H_D
+from lib.time import time, S
 from lib import X, D, L
 
 
@@ -56,36 +56,10 @@ def Eigenvalues(N, beta, alpha, driver=False, vec_normalize=False):
 
 beta = 0.1
 driver = True
-alpha_values = np.linspace(0, 1.5, 3000)
-N = 3
+alpha_values = np.linspace(0, 1, 3000)
+N = 4
 
 hd = H_D(N, X)
-
-
-ns = np.arange(2, N+1)
-gap = []
-for N in ns:
-    eigvals_avoided_crossing, eigvecs = Eigenvalues(
-        N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
-    # eigvals_crossing, _, _ = Eigenvalues(N=N, beta=beta, alpha=alpha_values, driver=False, vec_normalize=True)
-    eigvals_avoided_crossing = eigvals_avoided_crossing.T
-    eig = np.sort(eigvals_avoided_crossing[-1])
-    for i, e in enumerate(eig):
-        print(f"Eigenvalue {i}: {e}")
-    lowest_eigenvalues = eig[:2]
-    # Minimum gap at the last alpha value
-    gap.append(lowest_eigenvalues[1] - lowest_eigenvalues[0])
-
-print(f"Gaps for N={ns}: {gap}")
-plt.figure(figsize=(8, 6))
-plt.plot(ns, gap, marker='o')
-plt.xlabel("N")
-plt.ylabel("Minimum Energy Gap")
-plt.yscale("log")
-plt.title(r"Minimum Energy Gap vs N for $H = H_B + \alpha*(H_P)^2 + \beta*H_D$")
-plt.grid()
-plt.tight_layout()
-plt.show()
 
 eigvals_avoided_crossing, eigvecs = Eigenvalues(
     N=N, beta=beta, alpha=alpha_values, driver=True, vec_normalize=True)
@@ -155,7 +129,7 @@ for k, v in ids.items():
 
 plt.xlabel("Step")
 plt.ylabel("Position")
-plt.title("Significant Paths for Selected α Values")
+plt.title(r"Best Paths for Selected $\alpha$ Values")
 plt.legend()
 plt.grid()
 plt.show()
