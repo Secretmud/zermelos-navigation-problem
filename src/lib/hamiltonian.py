@@ -25,28 +25,32 @@ def H_B(N):
 @memory.cache
 def H_B2(N):
     costmatrix = np.zeros((3**N, 3**N), dtype='float64')
-    # times = [1, 3, 2]
+    times = [1, 3, 2]
     for k in range(N):
         mat = np.copy(Z)
         for i in range(N):
             c_time = time(k, mat[i][i], N)
-            mat[i][i] = c_time
+            print(c_time, end=" ")
+            mat[i][i] = times[i]
+        print()
         s_mat = sigma(N, k, matrix=mat)
         
-        # c_time = times[k]
         costmatrix += s_mat
 
     return costmatrix
 
 def N_H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
+    times = [1, 3, 2]
     for k in range(N):
-        c_mat = np.diag(ntime(k, N))
-        costmatrix += sigma(N, k, matrix=c_mat)
-
+        if not times:
+            c_mat = np.diag(ntime(k, N))
+            costmatrix += sigma(N, k, matrix=c_mat)
+        else:
+            costmatrix += sigma(N, k)*times[k]
     return costmatrix
 
-@memory.cache
+#@memory.cache
 def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
     sigma_trav = np.copy(Z)
@@ -54,7 +58,9 @@ def H_B(N):
         tmp_mat = np.zeros((3, 3), dtype=float_type)
         for i in range(3):
             t = time(k, sigma_trav[i, i], N)
+            print(f"{t:.6f}", end=" ")
             tmp_mat[i, i] = t
+        print()
 
         s_mat = sigma(N, k, matrix=tmp_mat)
         # s_mat = sigma(N, k) * c_time[k]
