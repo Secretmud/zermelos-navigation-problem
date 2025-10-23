@@ -39,9 +39,9 @@ def H_B2(N):
 
     return costmatrix
 
-def N_H_B(N):
+def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
-    times = [1, 3, 2]
+    times = None# [1, 3, 2, 1]
     for k in range(N):
         if not times:
             c_mat = np.diag(ntime(k, N))
@@ -49,7 +49,7 @@ def N_H_B(N):
         else:
             costmatrix += sigma(N, k)*times[k]
     return costmatrix
-
+"""
 #@memory.cache
 def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
@@ -67,8 +67,8 @@ def H_B(N):
         costmatrix += s_mat
 
     return costmatrix
-
-@memory.cache
+"""
+#@memory.cache
 def H_P(N):
     penalty_matrix = np.zeros((3**N, 3**N), dtype=float_type)
     for k in range(N):
