@@ -21,33 +21,18 @@ def H_B(N):
 
 
 """
-
-@memory.cache
 def H_B2(N):
-    costmatrix = np.zeros((3**N, 3**N), dtype='float64')
-    times = [1, 3, 2]
+    costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
+    times = [1, 3, 2, 1]
     for k in range(N):
-        mat = np.copy(Z)
-        for i in range(N):
-            c_time = time(k, mat[i][i], N)
-            print(c_time, end=" ")
-            mat[i][i] = times[i]
-        print()
-        s_mat = sigma(N, k, matrix=mat)
-        
-        costmatrix += s_mat
-
+        costmatrix += sigma(N, k)*times[k]
     return costmatrix
 
 def H_B(N):
     costmatrix = np.zeros((3**N, 3**N), dtype=float_type)
-    times = None# [1, 3, 2, 1]
     for k in range(N):
-        if not times:
-            c_mat = np.diag(ntime(k, N))
-            costmatrix += sigma(N, k, matrix=c_mat)
-        else:
-            costmatrix += sigma(N, k)*times[k]
+        c_mat = np.diag(ntime(k, N))
+        costmatrix += sigma(N, k, matrix=c_mat)
     return costmatrix
 """
 #@memory.cache

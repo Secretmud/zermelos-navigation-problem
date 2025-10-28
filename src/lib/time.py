@@ -1,10 +1,10 @@
 import numpy as np
-from lib import smax, D, L, v
+from lib import smax, D, v
 
 
-def S(x, offset=0.15):
-    return smax*np.exp(-(x-D/3)**4/5000)
-    # return (smax - offset)*np.sin(np.pi*x/D)+offset
+def S(x):
+    # return smax*np.exp(-(x-D/2)**4/5000)
+    return smax*np.exp(-(x-D/3)**4/4000)
 
 scale = 100
 
@@ -21,6 +21,7 @@ def ntime(k, N):
     t_down = dx / v * ((1 + g**2) / (np.sqrt(1 + g**2 - current**2) + g * current))
 
     # Return in order matching direction codes: 0 (straight), 1 (up), -1 (down)
+    # print(t_up, t_straight, t_down)
     return np.array([t_up, t_straight, t_down])
 
 
