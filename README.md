@@ -1,3 +1,24 @@
+# The project
+
+To run this project I reccomend setting up a Python virtual environment. You can do this by running the following commands in your terminal:
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+pip install -r requirements.txt
+```
+
+## Jupyter notebook 
+
+To run the Jupyter notebook, you can use the following command in your terminal:
+
+```bash
+jupyter lab
+```
+
+This will let you interact with the yves_method.ipynb notebook file. Which imports all the necessary functions from the library.
+
+
 # Classical computer requirements
 
 As you can see in the table below, to simply run a 11 qutrit system would for a float32 precision require roughly 117 GiB or RAM. Most computers nowadays are between 16 GB and 32GB. So doing a 10 qutrit simulation might our best option, altough it might be computationally costly in regards to time. 
