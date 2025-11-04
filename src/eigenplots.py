@@ -13,9 +13,9 @@ import joblib
 import matplotlib.pyplot as plt
 
 
-from lib.hamiltonian import N_H_B as H_B, H_P, H_D
+from lib.hamiltonian import H_B, H_P, H_D
 from lib.time import time, S
-from lib import X, D, L
+from lib import X, D
 
 
 memory = joblib.Memory(location=".joblib_cache", verbose=0)
@@ -114,14 +114,13 @@ sequences = all_move_sequences(N)
 print(f"All possible move sequences for N={N}:")
 plt.figure(figsize=(10, 6))
 x = np.linspace(0, D, N+1)
-dy = L/N
 for k, v in ids.items():
     print(f"For subplot with alpha {k}:")
     for data in v:
         t = 0
         for i in range(len(sequences[data['path']])):
             t += time(i, sequences[data['path']][i], N)
-        path = np.cumsum(sequences[data['path']])*dy
+        path = np.cumsum(sequences[data['path']])
         path = np.insert(path, 0, 0, axis=0)
         print(f"\tEigenvector: {data['eigvec']}")
         print(f"\tIndex {data['path']}: {sequences[data['path']]}, Time: {t}")

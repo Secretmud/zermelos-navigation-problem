@@ -51,15 +51,15 @@ for N, color in plot_groups.items():
     P0 = quickLZ(N, a_0_values, beta)
 
     alpha = 10
-    H = H_B(N) + alpha*H_P(N) + beta*H_D(N, X)
+    H = H_B(N) + alpha*H_P(N) # + beta*H_D(N, X)
     _, eigvecs = np.linalg.eigh(H)
     psi_0 = eigvecs[:, 0]  # Ground state
-    phi_0 = psi_0 / np.linalg.norm(psi_0)  # Normalize
+    psi_0 /= np.linalg.norm(psi_0)  # Normalize
 
     fidelities = [0] * len(a_0_values)
 
     for index, a_0 in enumerate(a_0_values):
-        fidelity = calculate_fidelity(a_0, N, beta, phi_0)
+        fidelity = calculate_fidelity(a_0, N, beta, psi_0)
         fidelities[index] = fidelity
         print(f"{index+1:>4d}/{len(a_0_values)} completed for N={N}", end="\r")
     print()

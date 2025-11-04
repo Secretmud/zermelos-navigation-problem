@@ -1,7 +1,7 @@
 import numpy as np
 from joblib import Memory
 
-from lib.sigma import sigma, sigma_test
+from lib.sigma import sigma, sigma_vec
 from lib.time import ntime, time
 from lib import Z, float_type
 
