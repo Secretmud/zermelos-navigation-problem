@@ -4,22 +4,27 @@ from lib import smax, D, v
 
 def S(x):
     # return smax*np.exp(-(x-D/2)**4/5000)
-    return smax*np.exp(-(x-D/3)**2/50)
+    return smax*np.exp(-(x-D)**2/50)
 
 scale = 100
 
 
 def ntime(k, N):
     dx = D / N
-    dy = dx / scale
+    dy = 0.05
     g = dy / dx
     x = dx * k
     current = S(x + dx / 2)
 
-    t_up = dx / v * ((1 + g**2) / (np.sqrt(1 + g**2 - current**2) - g * current))
-    t_straight = dx / v * (1 / (1 - current**2))
-    t_down = dx / v * ((1 + g**2) / (np.sqrt(1 + g**2 - current**2) + g * current))
+    #t_up = dx / v * ((1 + g**2) / (np.sqrt(1 + g**2 - current**2) - g * current))
+    #t_straight = dx / v * (1 / (1 - current**2))
+    #t_down = dx / v * ((1 + g**2) / (np.sqrt(1 + g**2 - current**2) + g * current))
 
+    t_up = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)-dy*current)
+    t_straight = dx/np.sqrt(v**2-current**2)
+    t_down = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)+dy*current)
+
+    
     # Return in order matching direction codes: 0 (straight), 1 (up), -1 (down)
     # print(t_up, t_straight, t_down)
     return np.array([t_up, t_straight, t_down])
