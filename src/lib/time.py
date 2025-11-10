@@ -4,7 +4,7 @@ from lib import smax, D, v
 
 def S(x):
     # return smax*np.exp(-(x-D/2)**4/5000)
-    return smax*np.exp(-(x-D)**2/50)
+    return smax * np.exp(-(x - D/13)**2)
 
 scale = 100
 
