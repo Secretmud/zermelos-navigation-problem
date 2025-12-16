@@ -11,7 +11,7 @@ scale = 100
 
 def ntime(k, N):
     dx = D / N
-    dy = 0.05
+    dy = dx/scale
     g = dy / dx
     x = dx * k
     current = S(x + dx / 2)
