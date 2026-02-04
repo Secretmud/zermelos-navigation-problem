@@ -1,7 +1,9 @@
 import numpy as np
 import scipy as sp
 from lib import X
+from lib import yvesData
 from lib.hamiltonian import H_B, H_P, H_D
+from lib.initial_states import initialState
 from joblib import Memory
 
 
@@ -40,17 +42,16 @@ def calc_steps(T, steps):
 
 
 @memory.cache
-def yves_TDSE(psi_init, Hi, Hf, T, steps=1000):
-    dt = calc_steps(T, steps)
+def yves_TDSE(args, steps=1000):
+    dt = calc_steps(args.t, steps)
+    psi = initialState(args.n)
 
-    psi = psi_init.copy()
-
-    eB = sp.linalg.expm(-1j * ( 1 - dt / (2*T)) * Hi * dt)
-    MB = sp.linalg.expm(1j * Hi * dt**2/T)
+    eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)
+    MB = sp.linalg.expm(1j * args.Hi * dt**2/args.t)
     t = 0
    
-    while t < T:
-        eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*T)*Hf)
+    while t < args.t:
+        eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*args.t)*args.Hf)
         psi = eA @ eB @ eA @ psi
         # update eA and eB for next step using the recursion
         eB = MB @ eB
