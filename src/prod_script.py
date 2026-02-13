@@ -1,6 +1,6 @@
 from lib.hamiltonian import H_B, H_D, H_P
 from lib.schrodinger import yves_TDSE
-from lib import X, D
+from lib import X, D, yvesData
 import numpy as np
 import scipy as sp
 import matplotlib.pyplot as plt
@@ -17,16 +17,20 @@ T_0 = 15
 T_f = 1500
 beta = -1
 
-
 runtime = {
-    1: [2, 3, 4, 5],
-    5: [2, 3, 4, 5],
-    10: [2, 3, 4, 5],
-    15: [2, 3, 4, 5],
-    20: [2, 3, 4, 5],
-    30: [2, 3, 4, 5],
+    10: [6]
 }
 
+"""
+runtime = {
+    1: [2, 3, 4, 5, 6],
+    5: [2, 3, 4, 5, 6],
+    10: [2, 3, 4, 5, 6],
+    15: [2, 3, 4, 5, 6],
+    20: [2, 3, 4, 5, 6],
+    30: [2, 3, 4, 5, 6],
+}
+"""
 
 for pen in runtime.keys():
     print(f"Producing data for penalty: {pen}")
@@ -35,38 +39,19 @@ for pen in runtime.keys():
         Hf = H_B(N) + pen * H_P(N)
         Hi = beta*H_D(N, X)
         
-        psi_f = np.diag(Hf)
-        
-        P = np.array([1/2, 1/np.sqrt(2), 1/2], dtype="complex")
-        initialState = P.copy()
-        for _ in range(N-1):
-            initialState = np.kron(initialState, P)
-        
         ts = np.linspace(T_0, T_f, nsteps)
-        f_all = False
+        args = yvesData(Hf=Hf, Hi=Hi, n=N, ts=ts)
         
-        
-        def check_degrenecy(arr):
-            min_value = np.min(arr)
-            mask = (arr == min_value)
-            return np.count_nonzero(mask)
-        c = check_degrenecy(psi_f)
-        
-        if c > 1:
-            print(f"Solution is degenerate, there are {c} occurences")
-            idx = np.where(psi_f == np.min(psi_f))[0]
-            print(f"They are located at indecies {idx}")
         fidelities = []
+        
+        psi_f = np.diag(Hf)
         gs_idx = np.argmin(psi_f)
-        plot_all = False
         
         for t in tqdm.tqdm(ts):
-            psi = yves_TDSE(initialState, Hi, Hf, t)
-            if plot_all:
-                fidelities.append(np.abs(psi))
-            else:
-                fidelity = np.abs(psi[gs_idx])**2
-                fidelities.append(fidelity)
+            args.t = t
+            psi = yves_TDSE(args)
+            fidelity = np.abs(psi[gs_idx])**2
+            fidelities.append(fidelity)
         
         
         f_name = f"{nsteps}_{beta}_{T_0}_{T_f}_{pen}_fids.csv"

@@ -28,22 +28,11 @@ def schrodinger(a_0, N, beta, n_steps=800):
         psi = exp_A @ exp_B @ exp_A @ psi
         psi /= np.linalg.norm(psi)
 
-    # print(f"{a=} {steps=} {t=}")
     return psi
 
-
-def calc_steps(T, steps):
-    dt = T/steps
-    while dt > 0.05:
-        steps += 100
-        dt = T/steps
-
-    return dt
-
-
 @memory.cache
-def yves_TDSE(args, steps=1000):
-    dt = calc_steps(args.t, steps)
+def yves_TDSE(args, steps=15000):
+    dt = args.t/steps
     psi = initialState(args.n)
 
     eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)

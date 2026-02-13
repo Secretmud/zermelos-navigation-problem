@@ -1,27 +1,45 @@
-from lib.hamiltonian import H_B, H_D, H_P
-from lib.schrodinger import yves_TDSE
-from lib import X, D
 import numpy as np
-import scipy as sp
 import matplotlib.pyplot as plt
-from joblib import Memory
-import itertools
-import tqdm
-import csv
-import pathlib
+from matplotlib import animation
+from lib import X, yvesData
+from lib.solvers import yield_bisection
+from lib.schrodinger import yves_TDSE
+from lib.hamiltonian import H_B, H_P, H_D
 
-memory = Memory(location=".joblib_cache", verbose=0)
-
-nsteps = 100
+n = 4
+pen = 5 
+beta = -1
 T_0 = 15
 T_f = 1500
-beta = -1
+nsteps = 5000
+F_thr = 0.6
 
-threshold = 0.9
+Hf = H_B(n) + pen * H_P(n)
+Hi = beta*H_D(n, X)
+ts = np.linspace(T_0, T_f, nsteps)
+args = yvesData(Hf=Hf, Hi=Hi, n=n, ts=ts)
 
-# Lets find threshold points quickly
+plt.xlim(T_0, T_f)
+plt.ylim(0, 1)
+plt.axhline(y=F_thr, color='b', linestyle='--', zorder=1)
+sol_t, sol_f = 0, 0
 
-for i in range(2, 6):
-    mid = (T_f - T_0)/2
-    
-    if 
+p = []
+for time, fid in yield_bisection(yves_TDSE, args, f_thr=F_thr):
+    p.append([time, fid])
+    plt.plot(time, fid, 'ro', zorder=2)
+    sol_t, sol_f = time, fid
+
+
+p = sorted(p, key=lambda x: x[0])
+
+p = np.array(p)
+
+x = p[:, 0]
+y = p[:, 1]
+
+plt.plot(x, y, '--', zorder=1)
+plt.plot(sol_t, sol_t, 'o', zorder=3, label=f"{pen=}")
+plt.axvline(sol_t, color='b', linestyle='--', label=f'{pen=} Fidelity: {sol_f:.3f} at Time: {sol_t:.3f}')
+plt.legend()
+plt.show()
