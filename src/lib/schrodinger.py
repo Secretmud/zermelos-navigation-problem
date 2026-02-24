@@ -30,21 +30,56 @@ def schrodinger(a_0, N, beta, n_steps=800):
 
     return psi
 
+
 @memory.cache
 def yves_TDSE(args, steps=15000):
-    dt = args.t/steps
+    T = float(args.t)
+    dt = T/steps
     psi = initialState(args.n)
 
-    eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)
-    MB = sp.linalg.expm(1j * args.Hi * dt**2/args.t)
-    t = 0
-   
-    while t < args.t:
-        eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*args.t)*args.Hf)
-        psi = eA @ eB @ eA @ psi
-        # update eA and eB for next step using the recursion
-        eB = MB @ eB
-        t += dt
+    eB = sp.linalg.expm(-1j * ( 1 - dt / (2*T)) * args.Hi * dt)
+    MB = sp.linalg.expm(1j * args.Hi * dt**2/T)
+    
+    for k in range(steps):
+       t = k * dt
+
+       eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*T)*args.Hf)
+       psi = eA @ eB @ eA @ psi
+       eB = MB @ eB
 
     return psi
     
+"""
+
+@memory.cache
+def yves_TDSE(args, steps=15000):
+    T = float(args.t)
+    dt = T / steps
+
+    psi = initialState(args.n).astype(np.complex128).reshape(-1)
+
+    # Extract diagonals as 1D arrays (works for sparse diagonal matrices too)
+    hi = np.asarray(args.Hi.diagonal(), dtype=np.float64)
+    hf = np.asarray(args.Hf.diagonal(), dtype=np.float64)
+
+    # Precompute diagonal phase factors
+    # eB0 = exp(-i * (1 - dt/(2T)) * Hi * dt)
+    eB = np.exp(-1j * (1.0 - dt/(2.0*T)) * hi * dt)
+
+    # MB = exp(+i * Hi * dt^2 / T)
+    MB = np.exp(1j * hi * (dt**2) / T)
+
+    for k in range(steps):
+        t = k * dt
+        # eA = exp(-i * (t + dt/2) * dt/(2T) * Hf)
+        a = -1j * (t + 0.5*dt) * dt / (2.0*T)
+        eA = np.exp(a * hf)
+
+        # psi = eA @ eB @ eA @ psi  (all diagonal => elementwise)
+        psi = (eA * eB * eA) * psi
+
+        # eB = MB @ eB  (diagonal => elementwise)
+        eB = MB * eB
+
+    return psi.reshape(-1, 1)  # if you want column vector
+"""
