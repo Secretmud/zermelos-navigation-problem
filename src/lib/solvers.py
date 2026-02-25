@@ -8,7 +8,8 @@ def fid_calc(psi, gs_idx, f_thr):
     if nrm == 0:
         raise ValueError("psi has zero norm")
     psi = psi / nrm
-    return (np.abs(psi[gs_idx])**2) - f_thr
+    return (np.abs(psi[gs_idx]) ** 2) - f_thr
+
 
 def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
     """
@@ -16,7 +17,7 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
     fully updateable at run time when you invoke the bisection method.
 
     This implementation uses yield so that we can get real-time data for the search.
-    
+
     f : function returning state psi for given args
     args : yvesData object containing Hf, Hi, ts, etc.
     f_thr : fidelity threshold
@@ -34,22 +35,23 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
     b_args = yvesData(Hf=args.Hf, Hi=args.Hi, n=args.n, t=b)
     psi = f(a_args)
     print("norm:", np.linalg.norm(np.asarray(psi).reshape(-1)))
-    print("F:", np.abs(np.asarray(psi).reshape(-1)[gs_idx])**2)
+    print("F:", np.abs(np.asarray(psi).reshape(-1)[gs_idx]) ** 2)
 
     psi = f(b_args)
     print("norm:", np.linalg.norm(np.asarray(psi).reshape(-1)))
-    print("F:", np.abs(np.asarray(psi).reshape(-1)[gs_idx])**2)
+    print("F:", np.abs(np.asarray(psi).reshape(-1)[gs_idx]) ** 2)
 
     f_a = fid_calc(f(a_args), gs_idx, f_thr)
     yield a, f_a + f_thr
     f_b = fid_calc(f(b_args), gs_idx, f_thr)
     yield b, f_b + f_thr
     if np.sign(f_a) == np.sign(f_b):
-        raise ValueError(f"For n={args.n}, no sign difference at endpoints; cannot bisect.")
+        raise ValueError(
+            f"For n={args.n}, no sign difference at endpoints; cannot bisect."
+        )
 
-    # Main bisection loop
     while 1:
-        if b - a <= 1:
+        if a - b <= 1:
             return
         mid = (a + b) // 2
         m_args = yvesData(Hf=args.Hf, Hi=args.Hi, n=args.n, t=mid)
@@ -64,4 +66,3 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
         else:
             b = mid
             f_b = f_mid
-

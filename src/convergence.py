@@ -16,17 +16,19 @@ F_thr = 0.9
 OUT = Path("figures/convergence")
 OUT.mkdir(parents=True, exist_ok=True)
 
+
 def compute_dense_fidelity(n: int, pen: int, nsteps: int):
     """Return ts, F(ts) for a dense run."""
+    print(f"{n} {pen} {nsteps}")
     Hf = H_B(n) + pen * H_P(n)
     Hi = beta * H_D(n, X)
-    ts = np.linspace(T_0, T_f, nsteps)
+    ts = np.linspace(T_0, T_f, 500)
     gs_idx = np.argmin(np.diagonal(Hf))
     fs = []
     for t in tqdm(ts):
         args = yvesData(Hf=Hf, Hi=Hi, n=n, t=t)
         F = yves_TDSE(args, steps=nsteps)  # should return array-like, same length as ts
-        fs.append(np.abs(F[gs_idx])**2)
+        fs.append(np.abs(F[gs_idx]) ** 2)
 
     F = np.asarray(fs, dtype=float)
     if F.shape[0] != ts.shape[0]:
@@ -35,6 +37,7 @@ def compute_dense_fidelity(n: int, pen: int, nsteps: int):
         raise ValueError("Non-finite values encountered in fidelity curve (NaN/Inf).")
 
     return ts, F
+
 
 def first_crossing_time(ts, F, thr):
     """
@@ -48,11 +51,12 @@ def first_crossing_time(ts, F, thr):
     if k == 0:
         return float(ts[0])
     # interpolate between k-1 and k
-    t0, t1 = ts[k-1], ts[k]
-    f0, f1 = F[k-1], F[k]
+    t0, t1 = ts[k - 1], ts[k]
+    f0, f1 = F[k - 1], F[k]
     if f1 == f0:
         return float(t1)
     return float(t0 + (thr - f0) * (t1 - t0) / (f1 - f0))
+
 
 def curve_error_against_reference(ts_ref, F_ref, ts, F):
     """
@@ -61,21 +65,24 @@ def curve_error_against_reference(ts_ref, F_ref, ts, F):
     F_on_ref = np.interp(ts_ref, ts, F)
     return float(np.max(np.abs(F_on_ref - F_ref)))
 
+
 def convergence_study(cases, nsteps_list):
     """
     cases: list of (n, pen)
     """
-    plt.rcParams.update({
-        "figure.figsize": (6.2, 3.8),
-        "savefig.dpi": 300,
-        "font.size": 10,
-        "axes.grid": True,
-        "grid.alpha": 0.25,
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-        "pdf.fonttype": 42,
-        "ps.fonttype": 42,
-    })
+    plt.rcParams.update(
+        {
+            "figure.figsize": (6.2, 3.8),
+            "savefig.dpi": 300,
+            "font.size": 10,
+            "axes.grid": True,
+            "grid.alpha": 0.25,
+            "axes.spines.top": False,
+            "axes.spines.right": False,
+            "pdf.fonttype": 42,
+            "ps.fonttype": 42,
+        }
+    )
 
     fig, ax = plt.subplots()
     ax.set_xlabel(r"Timestep $\Delta t$")
@@ -89,7 +96,7 @@ def convergence_study(cases, nsteps_list):
     ax2.set_xscale("log")
     ax2.set_yscale("log")
 
-    for (n, pen) in cases:
+    for n, pen in cases:
         # Use finest run as reference
         nsteps_ref = max(nsteps_list)
         ts_ref, F_ref = compute_dense_fidelity(n, pen, nsteps_ref)
@@ -102,6 +109,7 @@ def convergence_study(cases, nsteps_list):
             ts, F = compute_dense_fidelity(n, pen, Ns)
             dt = (T_f - T_0) / (Ns - 1)
             tthr = first_crossing_time(ts, F, F_thr)
+            print(f"{n} {pen} {tthr}")
             err = curve_error_against_reference(ts_ref, F_ref, ts, F)
 
             dts.append(dt)
@@ -123,10 +131,11 @@ def convergence_study(cases, nsteps_list):
 
 # Choose convergence test cases (tweak as needed)
 cases = [
-    #(3, 30),  # your “suspect” case
+    (5, 30),
+    (3, 30),  # your “suspect” case
     (2, 30),  # fast/easy case for contrast
 ]
 
-nsteps_list = [1000, 3000, 5000, 10000]
+nsteps_list = [1000, 3000, 5000, 10000, 15000, 25000, 35000]
 convergence_study(cases, nsteps_list)
 print("Saved convergence figures to figures/convergence/")
