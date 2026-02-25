@@ -18,12 +18,12 @@ beta = -1
 F_thr = 0.9
 
 runtime = {
-    1:  [2, 3, 4, 5],
-    5:  [2, 3, 4, 5],
-    10: [2, 3, 4, 5],
-    15: [2, 3, 4, 5],
-    20: [2, 3, 4, 5],
-    30: [2, 3, 4, 5],
+    1:  [2, 3],
+    5:  [2, 3],
+    10: [2, 3],
+    15: [2, 3],
+    20: [2, 3],
+    30: [2, 3],
 }
 
 # Pick representative penalties for the “mechanism” plots
@@ -101,10 +101,9 @@ def annotate_solution(ax, sol_t, sol_f):
     ax.axhline(F_thr, linestyle="--", linewidth=1.2)
     ax.axvline(sol_t, linestyle="--", linewidth=1.2)
     ax.plot(sol_t, sol_f, marker="o", linestyle="None", zorder=5)
-    # FIX: use \ast (or \star), not \*
     ax.text(
         0.02, 0.06,
-        rf"$t^{{\ast}}={sol_t:.2f}$, $F(t^{{\ast}})={sol_f:.3f}$",
+        rf"$T_f={sol_t:.2f}$, $F(T_f)={sol_f:.3f}$",
         transform=ax.transAxes,
         va="bottom", ha="left"
     )
@@ -122,13 +121,12 @@ def plot_diagnostic(points, sol_t, sol_f, n, pen, path):
     ax.set_ylabel("Fidelity $F(t)$")
     ax.set_title(rf"Diagnostics: $n={n}$, penalty $p={pen}$")
 
-    ax.axhline(F_thr, linestyle="--", linewidth=1.2, label=rf"$F_\mathrm{{thr}}={F_thr}$")
+    ax.axhline(F_thr, linestyle="--", linewidth=1.2, label=rf"$F_\text{{thr}}={F_thr}$")
 
     ax.plot(x, y, linestyle="--", linewidth=1.1, label="Bisection samples")
     ax.plot(x, y, linestyle="None", marker="o", label="Evaluations")
 
-    # FIX: use \ast
-    ax.axvline(sol_t, linestyle="--", linewidth=1.2, label=rf"$t^{{\ast}}={sol_t:.2f}$")
+    ax.axvline(sol_t, linestyle="--", linewidth=1.2, label=rf"$T_f={sol_t:.2f}$")
     ax.plot(sol_t, sol_f, marker="o", linestyle="None", zorder=5, label="Final point")
 
     ax.legend(loc="lower right", frameon=True)
@@ -214,15 +212,14 @@ print(f"\nSaved results to: {csv_path}")
 def make_main_summary_figure(df: pd.DataFrame, path: Path):
     fig, ax = plt.subplots(figsize=(6.2, 3.8))
     ax.set_xlabel("Penalty $p$")
-    # FIX: use \ast
-    ax.set_ylabel(r"Threshold time $t^{\ast}$")
-    ax.set_title(rf"Time to reach $F_\mathrm{{thr}}={F_thr}$")
+    ax.set_ylabel(r"Threshold time $T_f$")
+    ax.set_title(rf"Time to reach $F_\text{{thr}}={F_thr}$")
 
     for n, g in df.groupby("n"):
         g = g.sort_values("penalty")
         ax.plot(g["penalty"], g["t_star"], marker="o", label=rf"$n={n}$")
 
-    ax.legend(loc="upper left", frameon=True)
+    ax.legend(loc="lower right", frameon=True)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -258,8 +255,7 @@ def make_rep_panel_for_n(n: int, pens, path: Path):
         ax.plot(t_star, f_star, marker="o", linestyle="None", zorder=5)
 
         ax.set_title(rf"$p={pen}$")
-        # FIX: use \ast
-        ax.text(0.04, 0.06, rf"$t^{{\ast}}={t_star:.2f}$", transform=ax.transAxes)
+        ax.text(0.04, 0.06, rf"$T_f={t_star:.2f}$", transform=ax.transAxes)
 
     axes[0].set_ylabel("Fidelity $F(t)$")
     for ax in axes:
