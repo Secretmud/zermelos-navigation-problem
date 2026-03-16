@@ -32,28 +32,21 @@ def schrodinger(a_0, N, beta, n_steps=800):
 
     return psi
 
-
 @memory.cache
 def yves_TDSE(args, steps=25000):
-    T = float(args.t)
-    dt = T / steps
+    dt = args.t / steps
     psi = initialState(args.n)
 
-
-    if sp.sparse.issparse(args.Hi):
-        print("Is sparse")
-        eB = sp.sparse.linalg.expm(-1j * (1 - dt / (2 * T)) * args.Hi * dt)
-        MB = sp.sparse.linalg.expm(1j * args.Hi * dt**2 / T)
-    else:
-        print("Not sparse")
-        eB = sp.linalg.expm(-1j * (1 - dt / (2 * T)) * args.Hi * dt)
-        MB = sp.linalg.expm(1j * args.Hi * dt**2 / T)
-
-    for k in range(steps):
-        t = k * dt
-
-        eA = sp.sparse.linalg.expm(-1j * (t + dt / 2) * dt / (2 * T) * args.Hf)
+    eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)
+    MB = sp.linalg.expm(1j * args.Hi * dt**2/args.t)
+    t = 0
+   
+    while t < args.t:
+        eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*args.t)*args.Hf)
         psi = eA @ eB @ eA @ psi
+        # update eA and eB for next step using the recursion
         eB = MB @ eB
+        t += dt
 
     return psi
+    
