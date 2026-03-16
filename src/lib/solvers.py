@@ -11,7 +11,7 @@ def fid_calc(psi, gs_idx, f_thr):
     return (np.abs(psi[gs_idx]) ** 2) - f_thr
 
 
-def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
+def yield_bisection(f, args, f_thr=0.9, epsilon=1e-2, max_runs=40):
     """
     This function uses bisection to find roots, default threshold is set to 0.9, it is however
     fully updateable at run time when you invoke the bisection method.
@@ -49,9 +49,10 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
         raise ValueError(
             f"For n={args.n}, no sign difference at endpoints; cannot bisect."
         )
-
+    i = 0
     while 1:
-        if a - b <= 1:
+        if b - a <= epsilon or i == max_runs:
+            print("Returning")
             return
         mid = (a + b) // 2
         m_args = yvesData(Hf=args.Hf, Hi=args.Hi, n=args.n, t=mid)
@@ -66,3 +67,4 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-3):
         else:
             b = mid
             f_b = f_mid
+        i += 1
