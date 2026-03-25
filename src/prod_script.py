@@ -12,36 +12,28 @@ import pathlib
 
 memory = Memory(location=".joblib_cache", verbose=0)
 
-nsteps = 100
+nsteps = 15
 T_0 = 15
 T_f = 1500
 beta = -1
 
 runtime = {
-    1: [2, 3, 4, 5, 6],
-    5: [2, 3, 4, 5, 6],
-    10: [2, 3, 4, 5, 6],
-    15: [2, 3, 4, 5, 6],
-    20: [2, 3, 4, 5, 6],
-    30: [2, 3, 4, 5, 6],
+    1:  [2, 3, 4, 5],
+    5:  [2, 3, 4, 5],
+    10: [2, 3, 4, 5],
+    15: [2, 3, 4, 5],
+    20: [2, 3, 4, 5],
+    30: [2, 3, 4, 5],
 }
-
-"""
-runtime = {
-    1: [2, 3, 4, 5, 6],
-    5: [2, 3, 4, 5, 6],
-    10: [2, 3, 4, 5, 6],
-    15: [2, 3, 4, 5, 6],
-    20: [2, 3, 4, 5, 6],
-    30: [2, 3, 4, 5, 6],
-}
-"""
 
 for pen in runtime.keys():
     print(f"Producing data for penalty: {pen}")
     for N in runtime[pen]:
+        if N < 6:
+            nsteps = 100
         print(f"for n = {N}")
-        Hf = H_B(N) + pen * H_P(N)
+        n_pen = pen / N
+        Hf = H_B(N) + n_pen * H_P(N)
         Hi = beta * H_D(N, X)
 
         ts = np.linspace(T_0, T_f, nsteps)
@@ -60,7 +52,7 @@ for pen in runtime.keys():
 
         f_name = f"{nsteps}_{beta}_{T_0}_{T_f}_{pen}_fids.csv"
 
-        data_dir = pathlib.Path("data")
+        data_dir = pathlib.Path("data/testing/fidelities")
         data_dir.mkdir(exist_ok=True, parents=True)
 
         file_path = data_dir / f_name
@@ -81,4 +73,3 @@ for pen in runtime.keys():
             writer = csv.writer(f)
             for k, v in data.items():
                 writer.writerow([k, v])
-

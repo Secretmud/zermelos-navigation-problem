@@ -34,7 +34,7 @@ def schrodinger(a_0, N, beta, n_steps=800):
 
 @memory.cache
 def yves_TDSE(args, steps=25000):
-    dt = args.t / steps
+    dt = 0.05
     psi = initialState(args.n)
 
     eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)
@@ -44,7 +44,6 @@ def yves_TDSE(args, steps=25000):
     while t < args.t:
         eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*args.t)*args.Hf)
         psi = eA @ eB @ eA @ psi
-        # update eA and eB for next step using the recursion
         eB = MB @ eB
         t += dt
 

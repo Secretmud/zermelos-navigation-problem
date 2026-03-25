@@ -3,8 +3,6 @@ from lib import smax, D, v
 
 
 def S(x):
-    #return 0
-    #return smax*np.exp(-6*(x-D/2)**2)
     return smax * np.exp(-2*(x - (D/np.pi))**2)
 
 scale = 5
@@ -34,9 +32,6 @@ def ntime(k, N):
     t_straight = dx/np.sqrt(v**2-current**2)
     t_down = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)+dy*current)
 
-    
-    # Return in order matching direction codes: 0 (straight), 1 (up), -1 (down)
-    # print(t_up, t_straight, t_down)
     return np.array([t_up, t_straight, t_down])
 
 

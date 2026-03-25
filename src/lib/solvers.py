@@ -54,7 +54,7 @@ def yield_bisection(f, args, f_thr=0.9, epsilon=1e-2, max_runs=40):
         if b - a <= epsilon or i == max_runs:
             print("Returning")
             return
-        mid = (a + b) // 2
+        mid = (a + b) / 2
         m_args = yvesData(Hf=args.Hf, Hi=args.Hi, n=args.n, t=mid)
         f_mid = fid_calc(f(m_args), gs_idx, f_thr)
         yield mid, f_mid + f_thr
