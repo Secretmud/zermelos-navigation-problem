@@ -5,29 +5,17 @@ from lib import smax, D, v
 def S(x):
     return smax * np.exp(-2*(x - (D/np.pi))**2)
 
-scale = 5
-
-def ntime2(k, N):
-    dx = D / N
-    dy = dx / scale
-    x = dx * k
-
-    # Cell-average current (robust, keeps asymmetry)
-    xs = np.linspace(x, x + dx, 9)          # 9-point average; increase if needed
-    current = np.mean(S(xs))
-
-    t_up = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)-dy*current)
-    t_straight = dx/np.sqrt(v**2-current**2)
-    t_down = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)+dy*current)
-    return np.array([t_up, t_straight, t_down])
+scale = 4
 
 
 def ntime(k, N):
     dx = D / N
     dy = dx / scale
     g = dy / dx
-    x = dx * k
-    current = S(x + dx / 2)
+    x_k = (k - 1/2)*dx
+    current = S(x_k)
+    #x = dx * k
+    #current = S(x + dx/2)
     t_up = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)-dy*current)
     t_straight = dx/np.sqrt(v**2-current**2)
     t_down = (dx**2 + dy**2)/(np.sqrt((dx**2+dy**2)*v**2-dx**2*current**2)+dy*current)

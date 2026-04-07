@@ -12,47 +12,58 @@ import pathlib
 
 memory = Memory(location=".joblib_cache", verbose=0)
 
-nsteps = 15
+nsteps = 10
 T_0 = 15
 T_f = 1500
 beta = -1
 
+"""
 runtime = {
-    1:  [2, 3, 4, 5],
-    5:  [2, 3, 4, 5],
-    10: [2, 3, 4, 5],
-    15: [2, 3, 4, 5],
-    20: [2, 3, 4, 5],
-    30: [2, 3, 4, 5],
+    1:  [2, 3, 4, 5, 6, 7],
+    5:  [2, 3, 4, 5, 6, 7],
+    10: [2, 3, 4, 5, 6, 7],
+    15: [2, 3, 4, 5, 6, 7],
+    20: [2, 3, 4, 5, 6, 7],
+    30: [2, 3, 4, 5, 6, 7],
 }
-
+"""
+runtime = {
+    1:  [2, 3, 4, 5, 6, 7],
+    10:  [2, 3, 4, 5, 6, 7],
+    20: [2, 3, 4, 5, 6, 7],
+    40: [2, 3, 4, 5, 6, 7],
+    80: [2, 3, 4, 5, 6, 7],
+    120: [2, 3, 4, 5, 6, 7],
+}
 for pen in runtime.keys():
     print(f"Producing data for penalty: {pen}")
-    for N in runtime[pen]:
-        if N < 6:
+    for n in runtime[pen]:
+        if n < 4:
+            nsteps = 800
+        elif 4 <= n < 6:
             nsteps = 100
-        print(f"for n = {N}")
-        n_pen = pen / N
-        Hf = H_B(N) + n_pen * H_P(N)
-        Hi = beta * H_D(N, X)
+        else:
+            nsteps = 10
+        print(f"for n = {n}")
+        n_pen = pen / n
+        Hf = H_B(n) + n_pen * H_P(n)
+        Hi = beta * H_D(n, X)
 
         ts = np.linspace(T_0, T_f, nsteps)
-        args = yvesData(Hf=Hf, Hi=Hi, n=N, ts=ts)
+        args = yvesData(Hf=Hf, Hi=Hi, n=n, ts=ts)
 
         fidelities = []
-
-        psi_f = np.diag(Hf)
-        gs_idx = np.argmin(psi_f)
 
         for t in tqdm.tqdm(ts):
             args.t = t
             psi = yves_TDSE(args)
-            fidelity = np.abs(psi[gs_idx]) ** 2
+            idx = np.argmax(np.abs(psi)**2)
+            fidelity = np.abs(psi[idx])**2
             fidelities.append(fidelity)
 
         f_name = f"{nsteps}_{beta}_{T_0}_{T_f}_{pen}_fids.csv"
 
-        data_dir = pathlib.Path("data/testing/fidelities")
+        data_dir = pathlib.Path("data/final2/fidelities")
         data_dir.mkdir(exist_ok=True, parents=True)
 
         file_path = data_dir / f_name
@@ -60,7 +71,7 @@ for pen in runtime.keys():
 
         fidelities = np.array(fidelities)
 
-        data = {N: fidelities.tolist()}
+        data = {n: fidelities.tolist()}
 
         with open(file_path, newline="") as csvfile:
             data_reader = csv.reader(csvfile, delimiter=",")

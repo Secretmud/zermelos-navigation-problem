@@ -3,6 +3,7 @@ import scipy as sp
 from lib import X
 from lib import yvesData
 from lib.hamiltonian import H_B, H_P, H_D
+from lib.schedulers import alpha, beta
 from lib.initial_states import initialState
 from joblib import Memory
 
@@ -40,12 +41,13 @@ def yves_TDSE(args, steps=25000):
     eB = sp.linalg.expm(-1j * ( 1 - dt / (2*args.t)) * args.Hi * dt)
     MB = sp.linalg.expm(1j * args.Hi * dt**2/args.t)
     t = 0
-   
+    Hf = np.diagonal(args.Hf)
     while t < args.t:
-        eA = sp.linalg.expm(-1j*(t + dt / 2)*dt/(2*args.t)*args.Hf)
-        psi = eA @ eB @ eA @ psi
+        eA = np.exp(-1j*(t + dt / 2)*dt/(2*args.t)*Hf)
+        psi = eA * psi
+        psi = np.matmul(eB, psi)
+        psi = eA * psi
         eB = MB @ eB
         t += dt
 
     return psi
-    

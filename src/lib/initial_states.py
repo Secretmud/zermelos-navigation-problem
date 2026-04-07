@@ -7,3 +7,12 @@ def initialState(N) -> np.array:
         initialState = np.kron(initialState, P)
 
     return initialState
+
+
+def initialState_test(N) -> np.array:
+    P = np.array([1/2, 1/np.sqrt(2), 1/2], dtype="complex")
+    initialState = 1
+    for _ in range(N):
+        initialState = np.kron(initialState, P)
+
+    return initialState
