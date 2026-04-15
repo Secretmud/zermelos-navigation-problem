@@ -13,25 +13,77 @@ memory = Memory(location=".joblib_cache", verbose=0)
 
 
 @memory.cache
-def schrodinger(a_0, N, beta, n_steps=800):
-    dt = a_0 / n_steps
-    print(dt)
-    H_p = H_P(N)
+def schrodinger_split(
+    T,
+    N,
+    T_x,
+    T_pen,
+    alpha_max,
+    beta_max,
+    n_steps=25,
+):
+    #dt = T/n_steps
+    dt = 0.05
+    H_cost = H_B(N)
+    H_X = H_D(N, X)
+    H_pen = H_P(N)
+
+    cost_vec = np.diagonal(H_cost)
+    pen_vec = np.diagonal(H_pen)
+
     psi = np.zeros(3**N, dtype=complex)
-    psi[-1] = 1
-    psi /= np.linalg.norm(psi)
-    H_0 = H_B(N) + beta * H_D(N, X)
-    B = -1j * H_0 * dt
-    exp_B = sp.linalg.expm(B)
-    del H_0, B
-    for t in range(n_steps):
-        a = a_0 * (t + dt / 2)
-        A = -1j * a * H_p * dt / 2
-        exp_A = sp.linalg.expm(A)
-        psi = exp_A @ exp_B @ exp_A @ psi
-        psi /= np.linalg.norm(psi)
+    psi[-1] = 1.0
+
+
+    def a(t):
+        if t < T_x:
+            return alpha_max * (t / T_x)
+        elif t < T_x + T_pen:
+            return alpha_max
+        elif t < 2*T_x + T_pen:
+            return alpha_max * (1 - (t - (T_x + T_pen)) / T_x)
+        else:
+            return 0
+    
+    def b(t):
+        if t < T_x:
+            return 0
+        elif t < T_x + T_pen:
+            return beta_max * (t - T_x) / T_pen
+        else:
+            return beta_max
+    t = 0
+    while t < T:
+        
+        t_mid = t + 0.5 * dt
+
+        if 0 < t_mid <= T_x:
+            H_A = cost_vec
+            H_B_eff = a(t_mid) * H_X
+            exp_A = np.exp(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
+            psi = exp_A * psi
+            psi = exp_B @ psi
+            psi = exp_A * psi
+        elif T_x < t_mid <= T_x + T_pen:
+            H_A = H_cost + alpha_max * H_X
+            H_B_eff = b(t_mid) * H_pen
+            exp_A = sp.linalg.expm(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
+            psi = exp_A @ exp_B @ exp_A @ psi
+        elif T_x + T_pen < t_mid <= 2 * T_x + T_pen:
+            H_A = cost_vec + beta_max * pen_vec
+            H_B_eff = a(t_mid) * H_X
+            exp_A = np.exp(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
+            psi = exp_A * psi
+            psi = exp_B @ psi
+            psi = exp_A * psi
+
+        t += dt
 
     return psi
+
 
 @memory.cache
 def yves_TDSE(args, steps=25000):

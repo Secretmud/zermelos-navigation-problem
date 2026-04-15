@@ -1,6 +1,6 @@
 
 
-def alpha(t, T_x, T_pen):
+def alpha(t, T_x, T_pen, alpha_max):
     if t < T_x:
         return alpha_max * (t / T_x)
     elif t < T_x + T_pen:
@@ -10,7 +10,7 @@ def alpha(t, T_x, T_pen):
     else:
         return 0
 
-def beta(t, T_x, T_pen):
+def beta(t, T_x, T_pen, beta_max):
     if t < T_x:
         return 0
     elif t < T_x + T_pen:
