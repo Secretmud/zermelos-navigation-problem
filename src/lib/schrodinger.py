@@ -14,16 +14,15 @@ memory = Memory(location=".joblib_cache", verbose=0)
 
 @memory.cache
 def schrodinger_split(
-    T,
+    T_pen,
     N,
     T_x,
-    T_pen,
     alpha_max,
     beta_max,
-    n_steps=25,
+    n_steps=2500,
 ):
-    #dt = T/n_steps
-    dt = 0.05
+    dt = T_pen/n_steps
+    #dt = 0.1
     H_cost = H_B(N)
     H_X = H_D(N, X)
     H_pen = H_P(N)
@@ -33,7 +32,6 @@ def schrodinger_split(
 
     psi = np.zeros(3**N, dtype=complex)
     psi[-1] = 1.0
-
 
     def a(t):
         if t < T_x:
@@ -53,7 +51,7 @@ def schrodinger_split(
         else:
             return beta_max
     t = 0
-    while t < T:
+    while t < 2*T_x + T_pen:
         
         t_mid = t + 0.5 * dt
 

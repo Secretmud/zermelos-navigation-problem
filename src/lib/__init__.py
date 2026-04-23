@@ -6,10 +6,10 @@ from dataclasses import dataclass
 class yvesData():
     Hi: np.ndarray
     Hf: np.ndarray 
-    n: np.int
-    t: np.float = None
+    n: np.int32
+    t: np.float32 = None
     ts: np.array = None
-    gs_idx: np.int = None
+    gs_idx: np.int32 = None
 
 Z = np.array([[1, 0, 0], [0, 0, 0], [0, 0, -1]])
 X = 1/np.sqrt(2)*np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])
