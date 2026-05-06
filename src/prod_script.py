@@ -17,16 +17,6 @@ T_0 = 15
 T_f = 1500
 beta = -1
 
-"""
-runtime = {
-    1:  [2, 3, 4, 5, 6, 7],
-    5:  [2, 3, 4, 5, 6, 7],
-    10: [2, 3, 4, 5, 6, 7],
-    15: [2, 3, 4, 5, 6, 7],
-    20: [2, 3, 4, 5, 6, 7],
-    30: [2, 3, 4, 5, 6, 7],
-}
-"""
 runtime = {
     1:  [2, 3, 4, 5, 6, 7],
     10:  [2, 3, 4, 5, 6, 7],
@@ -53,12 +43,12 @@ for pen in runtime.keys():
         args = yvesData(Hf=Hf, Hi=Hi, n=n, ts=ts)
 
         fidelities = []
+        gs = np.argmin(np.diagonal(Hf))
 
         for t in tqdm.tqdm(ts):
             args.t = t
             psi = yves_TDSE(args)
-            idx = np.argmax(np.abs(psi)**2)
-            fidelity = np.abs(psi[idx])**2
+            fidelity = np.abs(psi[gs])**2
             fidelities.append(fidelity)
 
         f_name = f"{nsteps}_{beta}_{T_0}_{T_f}_{pen}_fids.csv"
