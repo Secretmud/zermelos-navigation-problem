@@ -19,33 +19,28 @@ def schrodinger_split(
     beta_max,
     n_steps=2500,
 ):
-    dt = T_pen / n_steps
+    dt = T_pen/n_steps
+    #dt = 0.1
     H_cost = H_B(N)
-    H_X    = H_D(N, X)
-    H_pen  = H_P(N)
+    H_X = H_D(N, X)
+    H_pen = H_P(N)
 
     cost_vec = np.diagonal(H_cost)
-    pen_vec  = np.diagonal(H_pen)
+    pen_vec = np.diagonal(H_pen)
 
-
-    eigvals_X, U_X = np.linalg.eigh(H_X)
-    U_X_dag = U_X.conj().T
-
-
-    eigvals_A2, U_A2 = np.linalg.eigh(H_cost + alpha_max * H_X)
-    U_A2_dag = U_A2.conj().T
-    exp_A2   = np.exp(-1j * eigvals_A2 * dt / 2.0)
+    psi = np.zeros(3**N, dtype=complex)
+    psi[-1] = 1.0
 
     def a(t):
         if t < T_x:
             return alpha_max * (t / T_x)
         elif t < T_x + T_pen:
             return alpha_max
-        elif t < 2 * T_x + T_pen:
+        elif t < 2*T_x + T_pen:
             return alpha_max * (1 - (t - (T_x + T_pen)) / T_x)
         else:
             return 0
-
+    
     def b(t):
         if t < T_x:
             return 0
@@ -53,37 +48,38 @@ def schrodinger_split(
             return beta_max * (t - T_x) / T_pen
         else:
             return beta_max
-
-    psi = np.zeros(3**N, dtype=complex)
-    psi[-1] = 1.0
-
     t = 0
-    while t < 2 * T_x + T_pen:
+    while t < 2*T_x + T_pen:
+        
         t_mid = t + 0.5 * dt
 
         if 0 < t_mid <= T_x:
-            exp_A = np.exp(-1j * cost_vec * dt / 2.0)
-            exp_B = np.exp(-1j * a(t_mid) * eigvals_X * dt)
+            H_A = cost_vec
+            H_B_eff = a(t_mid) * H_X
+            exp_A = np.exp(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
             psi = exp_A * psi
-            psi = U_X @ (exp_B * (U_X_dag @ psi))
+            psi = exp_B @ psi
             psi = exp_A * psi
-
         elif T_x < t_mid <= T_x + T_pen:
-            exp_B = np.exp(-1j * b(t_mid) * pen_vec * dt)
-            psi = U_A2 @ (exp_A2 * (U_A2_dag @ psi))
-            psi = exp_B * psi
-            psi = U_A2 @ (exp_A2 * (U_A2_dag @ psi))
-
+            H_A = H_cost + alpha_max * H_X
+            H_B_eff = b(t_mid) * H_pen
+            exp_A = sp.linalg.expm(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
+            psi = exp_A @ exp_B @ exp_A @ psi
         elif T_x + T_pen < t_mid <= 2 * T_x + T_pen:
-            exp_A = np.exp(-1j * (cost_vec + beta_max * pen_vec) * dt / 2.0)
-            exp_B = np.exp(-1j * a(t_mid) * eigvals_X * dt)
+            H_A = cost_vec + beta_max * pen_vec
+            H_B_eff = a(t_mid) * H_X
+            exp_A = np.exp(-1j * H_A * dt / 2.0)
+            exp_B = sp.linalg.expm(-1j * H_B_eff * dt)
             psi = exp_A * psi
-            psi = U_X @ (exp_B * (U_X_dag @ psi))
+            psi = exp_B @ psi
             psi = exp_A * psi
 
         t += dt
 
     return psi
+
 
 
 @memory.cache

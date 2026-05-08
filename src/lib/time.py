@@ -3,7 +3,7 @@ from lib import smax, D, v
 
 
 def S(x):
-    return smax * np.exp(-2*(x - (D/np.pi))**2)
+    return smax * np.exp(-1*(x - (D/np.pi))**2)
 
 scale = 4
 
