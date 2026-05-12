@@ -20,16 +20,18 @@ import scripts.fidelity_threshold as fidelity_threshold
 import scripts.energy_gap as energy_gap
 import scripts.convergence as convergence
 import scripts.eigenplots as eigenplots
+import scripts.lz_plots as lzplots
 
 PLOTS = Path("plots")
 
 print("=== fidelity threshold ===")
-fidelity_threshold.main(PLOTS / "fidelity")
+# fidelity_threshold.main(PLOTS / "fidelity")
 
 print("\n=== energy gap ===")
-energy_gap.main(PLOTS / "energy_gap")
+# energy_gap.main(PLOTS / "energy_gap")
 
 print("\n=== eigenplots ===")
-eigenplots.main(PLOTS / "eigenplots")
+# eigenplots.main(PLOTS / "eigenplots")
 
-print(f"\nAll plots written to {PLOTS.resolve()}/")
+
+lzplots.main(PLOTS / "lz")
